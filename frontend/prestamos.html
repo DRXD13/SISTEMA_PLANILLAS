@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mantenimiento de Préstamos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+        /* El preflight de Tailwind deja los botones de SweetAlert con fondo transparente (texto blanco invisible) */
+        .swal2-container .swal2-styled.swal2-confirm { background-color: var(--swal2-confirm-button-background-color, #7066e0); }
+        .swal2-container .swal2-styled.swal2-cancel { background-color: var(--swal2-cancel-button-background-color, #6e7881); }
+        .swal2-container .swal2-styled.swal2-deny { background-color: var(--swal2-deny-button-background-color, #dc3741); }
+    body { background-color: #f1f5f9; }
+    .sidebar { width: 220px; }
+    .main-content { margin-left: 220px; }
+    #tabla-prestamos th { background-color: #f3f4f6; font-weight: 600; text-transform: uppercase; color: #4b5563; font-size: 0.75rem; }
+    .sidebar a.active-link { background-color: #4b5563; color: #fff; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+
+<body>
+
+<aside class="sidebar fixed top-0 left-0 h-full bg-gray-900 text-white p-4 z-10">
+    <h1 class="text-xl font-bold mb-6 text-center tracking-wider text-blue-400">MENU PRINCIPAL</h1>
+    <nav class="space-y-2">
+        <a id="link-persona" href="index.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-user w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Persona</span>
+        </a>
+        
+        <button type="button" class="flex items-center w-full py-3 px-4 rounded hover:bg-gray-800 transition-colors text-left" data-collapse-toggle="dropdown-mantenimiento">
+            <i class="fas fa-tools w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium flex-1">Mantenimiento</span>
+            <i class="fas fa-chevron-down text-xs text-gray-500 ml-auto"></i>
+        </button>
+        <ul id="dropdown-mantenimiento" class="hidden py-2 space-y-1 bg-gray-800 rounded ml-4 mt-1">
+            <li><a href="mantenimiento-profesion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-graduation-cap w-5 mr-2 text-center text-xs"></i> Profesión</a></li>
+            <li><a href="mantenimiento-area.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-building w-5 mr-2 text-center text-xs"></i> Área</a></li>
+            <li><a href="mantenimiento-cargos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-briefcase w-5 mr-2 text-center text-xs"></i> Cargos</a></li>
+            <li><a href="mantenimiento-grupo-ocupacional.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-layer-group w-5 mr-2 text-center text-xs"></i> Grupo Ocup.</a></li>
+            <li><a href="mantenimiento-sistemas-pensiones.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-piggy-bank w-5 mr-2 text-center text-xs"></i> Sist. Pensiones</a></li>
+            <li><a href="mantenimiento-meta.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-bullseye w-5 mr-2 text-center text-xs"></i> Metas</a></li>
+            <li><a href="mantenimiento-conceptos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-list-ul w-5 mr-2 text-center text-xs"></i> Conceptos</a></li>
+            <li><a href="mantenimiento-entidad.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-university w-5 mr-2 text-center text-xs"></i> Entidades Fin.</a></li>
+            <li><a href="mantenimiento-configuracion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-cogs w-5 mr-2 text-center text-xs"></i> Configuración</a></li>
+        <li>
+    <a href="mantenimiento-sindicatos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+        <i class="fas fa-users w-5 mr-2 text-center text-xs"></i> Sindicatos
+    </a>
+</li>
+        </ul>
+        
+        <a id="link-empleados" href="mantenimiento-empleados.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-id-card w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Trabajadores</span>
+        </a>
+        <a id="link-comisiones-spp" href="mantenimiento-comisiones-spp.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-chart-line w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Comisiones SPP</span>
+        </a>
+        <a id="link-asistencias" href="control-asistencias.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-calendar-check w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Asistencias</span>
+        </a>
+        <a id="link-judiciales" href="judiciales.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-gavel w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Judiciales</span>
+        </a>
+
+        <a id="link-prestamos" href="prestamos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-hand-holding-usd w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium">Préstamos</span>
+        </a>
+
+        <a id="link-planilla" href="calculo-planilla.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-calculator w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Planilla</span>
+        </a>
+        <a id="link-sindicatos-operacion" href="sindicatos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors border-l-4 border-transparent hover:border-pink-500">
+    <i class="fas fa-handshake w-6 text-center mr-2 text-gray-400"></i>
+    <span class="font-medium">Sindicate</span>
+</a>
+    </nav>
+    <div class="absolute bottom-0 left-0 w-full p-4 text-center text-xs text-gray-600 border-t border-gray-800">v2.0 Sistema RRHH</div>
+</aside>
+
+<div class="main-content min-h-screen">
+    <header class="bg-blue-600 text-white p-4 flex justify-between items-center shadow">
+      <h2 class="text-lg font-semibold">Gestión de Préstamos <span id="periodo-actual" class="ml-4 text-sm font-normal bg-blue-700 px-3 py-1 rounded shadow-sm"></span></h2>
+      <div class="relative inline-block text-left">
+        <img src="avatar.png" alt="Usuario" class="w-10 h-10 rounded-full border-2 border-white cursor-pointer" onclick="toggleDropdown()">
+        <div id="user-dropdown"
+                    class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg overflow-hidden z-50">
+                    <div class="px-4 py-2 text-gray-700 border-b">
+                        <span id="user-name" class="font-semibold">Usuario: -</span>
+                    </div>
+                    
+                    <!-- NUEVO BOTÓN DE GESTIÓN DE USUARIOS -->
+                    <a href="gestion-usuarios.html" id="btn-gestion-usuarios" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        👥 Gestión de Usuarios
+                    </a>
+                    
+                    <button onclick="cambiarPeriodo()" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        🔄 Cambiar Período
+                    </button>
+                    <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
+      </div>
+    </header>
+
+    <div class="p-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-5 border-l-4 border-blue-600 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-xs font-bold uppercase tracking-wider">TOTAL PRESTADO (FILTRADO)</p>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-1" id="lbl-total-prestamos">S/ 0.00</h2>
+                </div>
+                <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
+                    <i class="fas fa-coins text-xl"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">FILTRAR / REGISTRAR PRÉSTAMO</h3>
+            
+            <form id="form-buscar-prestamo" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                
+                <div class="md:col-span-12 flex gap-2 mb-2">
+                    <button type="button" onclick="aplicarFiltroTipo('')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-3 rounded text-xs transition-colors border border-gray-300">TODOS</button>
+                    <button type="button" onclick="aplicarFiltroTipo('EMPLEADO')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-1 px-3 rounded text-xs transition-colors border border-blue-200">EMPLEADOS</button>
+                    <button type="button" onclick="aplicarFiltroTipo('OBRERO')" class="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-1 px-3 rounded text-xs transition-colors border border-orange-200">OBREROS</button>
+                    <button type="button" onclick="aplicarFiltroTipo('CAS')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-1 px-3 rounded text-xs transition-colors border border-purple-200">CAS</button>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">POR CAMPO</label>
+                    <select id="tipo_busqueda" class="border rounded p-2 w-full mt-1"><option value="nombre">NOMBRE</option><option value="dni">DNI</option></select>
+                </div>
+                <div class="md:col-span-6">
+                    <label class="block text-sm font-medium text-gray-700">DATOS DE BÚSQUEDA</label>
+                    <input type="text" id="valor_busqueda" placeholder="Escriba aquí..." class="border rounded p-2 w-full mt-1 uppercase">
+                </div>
+                <div class="md:col-span-2"><button type="button" id="btn-filtrar" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded w-full mt-1">BUSCAR</button></div>
+                <div class="md:col-span-2"><button type="button" onclick="abrirModalPrestamo()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-2 rounded w-full mt-1">NUEVO</button></div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">LISTA DE PRÉSTAMOS (ACTIVOS)</h3>
+            <div class="overflow-x-auto">
+                <table id="tabla-prestamos" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left">ID</th>
+                            <th class="px-6 py-3 text-left">DNI</th>
+                            <th class="px-6 py-3 text-left">TRABAJADOR</th>
+                            <th class="px-6 py-3 text-left">TIPO</th>
+                            <th class="px-6 py-3 text-left">BANCO</th>
+                            <th class="px-6 py-3 text-center">MONTO TOTAL</th>
+                            <th class="px-6 py-3 text-center">FECHA</th>
+                            <th class="px-6 py-3 text-center">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-tabla-prestamos" class="bg-white divide-y divide-gray-200 text-sm">
+                        <tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">Cargando datos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="prestamoModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity backdrop-blur-sm" onclick="cerrarModalPrestamo()"></div>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-visible shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-200">
+            <div class="bg-white px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10">
+                <h3 class="text-lg font-bold text-gray-800 uppercase" id="modal-title">REGISTRAR NUEVO PRÉSTAMO</h3>
+                <button type="button" onclick="cerrarModalPrestamo()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="bg-gray-50 flex border-b">
+                <button type="button" onclick="cambiarTab('tab-trabajador')" id="btn-tab-trabajador" class="flex-1 py-4 text-center font-bold text-sm text-gray-700 bg-white border-t-4 border-blue-600 uppercase">1. BUSCAR TRABAJADOR</button>
+                <button type="button" onclick="cambiarTab('tab-detalle')" id="btn-tab-detalle" class="flex-1 py-4 text-center font-bold text-sm text-gray-500 hover:bg-gray-50 border-t-4 border-transparent uppercase">2. DETALLE PRÉSTAMO</button>
+            </div>
+            <form id="form-prestamo" class="p-8 bg-white space-y-6">
+                <input type="hidden" id="id_prestamo">
+                <div id="tab-trabajador">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-1 w-full space-y-6">
+                            <div><label class="block text-xs font-bold text-gray-600 uppercase mb-1">ID Préstamo</label><input type="text" value="NUEVO" readonly class="block w-full bg-gray-100 border border-gray-300 text-gray-500 rounded p-2.5 text-sm font-bold"></div>
+                            <div class="relative">
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Buscar Trabajador (DNI o Nombre)</label>
+                                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div><input type="text" id="search-trabajador" autocomplete="off" class="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2.5 uppercase text-sm" placeholder="ESCRIBA DNI O APELLIDOS..."><ul id="lista-trabajadores" class="hidden absolute z-50 w-full bg-white border border-gray-300 rounded mt-1 max-h-48 overflow-y-auto shadow-xl custom-scroll"></ul></div>
+                                <input type="hidden" id="id_trabajador_sel">
+                                <div id="info-trabajador" class="hidden mt-2 p-2 bg-blue-50 text-blue-800 text-xs rounded border border-blue-200"><span class="font-bold">Seleccionado:</span> <span id="txt-trabajador"></span><button type="button" onclick="limpiarSeleccion()" class="ml-2 text-red-600 font-bold hover:underline">X</button></div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-auto flex flex-col items-center justify-center pt-2"><div class="w-32 h-32 rounded-full border-4 border-gray-100 shadow-md overflow-hidden bg-white flex items-center justify-center"><img id="img-avatar-trabajador" src="avatar.png" alt="Avatar" class="w-full h-full object-cover"></div></div>
+                    </div>
+                </div>
+                <div id="tab-detalle" class="hidden">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2"><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Entidad Financiera</label><div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-university text-gray-400"></i></div><select id="pres-entidad" class="pl-10 block w-full border-gray-300 rounded p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 uppercase font-bold text-gray-700"><option value="">-- SELECCIONE BANCO / CAJA --</option></select></div></div>
+                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Monto Total (S/)</label><input type="number" step="0.01" id="pres-monto" class="block w-full border-gray-300 rounded p-2.5 text-lg font-bold text-gray-800" placeholder="0.00"></div>
+                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fecha Inicio</label><input type="date" id="pres-fecha" class="block w-full border-gray-300 rounded p-2.5 text-sm"></div>
+                        <div class="md:col-span-2"><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Observaciones</label><textarea id="pres-obs" rows="4" class="block w-full border-gray-300 rounded p-2.5 text-sm uppercase resize-none" placeholder="INGRESE DETALLE..."></textarea></div>
+                    </div>
+                </div>
+            </form>
+            <div class="bg-white px-8 py-6 flex justify-between border-t rounded-b-lg">
+                <button type="button" onclick="cerrarModalPrestamo()" class="px-6 py-2.5 border border-gray-300 rounded text-gray-700 font-bold hover:bg-gray-50 transition text-sm">CANCELAR</button>
+                <div class="flex gap-3"><button type="button" onclick="guardarPrestamo()" class="px-6 py-2.5 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow transition text-sm uppercase">GUARDAR DATOS</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="seguridad-roles.js"></script>
+</body>
+</html>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<script src="prestamos.js?v=2"></script>
+
+<script>
+    const logout = () => { localStorage.clear(); window.location.href = 'login.html'; };
+    const toggleDropdown = () => { document.getElementById('user-dropdown').classList.toggle('hidden'); };
+    const cambiarPeriodo = async () => {
+        const btn = document.querySelector('button[onclick="cambiarPeriodo()"]');
+        if(btn) btn.innerHTML = 'Cerrando...';
+        localStorage.removeItem('periodo'); window.location.replace('index.html'); 
+    };
+    window.addEventListener('click', (e) => { if (document.getElementById('user-dropdown') && !e.target.closest('.relative')) document.getElementById('user-dropdown').classList.add('hidden'); });
+    document.addEventListener('DOMContentLoaded', () => { 
+        const rolUsuario = localStorage.getItem('rol') || 'Administrador';
+document.getElementById('user-name').textContent = `Rol: ${rolUsuario}`; 
+        const p = localStorage.getItem('periodo');
+        const lbl = document.getElementById('periodo-actual');
+        if (lbl) lbl.textContent = (p && p !== 'null') ? `Período: ${p}` : 'N/A';
+        const path = window.location.pathname.split('/').pop();
+        if (path === 'prestamos.html') document.getElementById('link-prestamos')?.classList.add('active-link');
+    });
+</script>
+</body>
+</html>

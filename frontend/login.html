@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Planilla de Empleados</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* El preflight de Tailwind deja los botones de SweetAlert con fondo transparente (texto blanco invisible) */
+        .swal2-container .swal2-styled.swal2-confirm { background-color: var(--swal2-confirm-button-background-color, #7066e0); }
+        .swal2-container .swal2-styled.swal2-cancel { background-color: var(--swal2-cancel-button-background-color, #6e7881); }
+        .swal2-container .swal2-styled.swal2-deny { background-color: var(--swal2-deny-button-background-color, #dc3741); }
+        .bg-office {
+            background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 5s ease-in-out infinite;
+        }
+        .hidden-step {
+            display: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-full relative font-sans overflow-hidden bg-slate-900">
+    
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-blue-900/40 backdrop-blur-[2px]"></div>
+    </div>
+
+    <div class="relative z-10 flex flex-col items-center justify-center h-full px-4">
+        
+        <div class="w-full max-w-[400px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden transform transition-all hover:shadow-blue-500/20 hover:border-white/30 duration-500">
+            
+            <div class="p-8 text-center border-b border-white/10">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/40 mb-6 animate-float">
+                    <i id="header-icon" class="fas fa-user-shield text-3xl text-white"></i>
+                </div>
+                <h2 id="header-title" class="text-3xl font-bold text-white tracking-tight">Bienvenido</h2>
+                <p id="header-subtitle" class="text-blue-200/80 text-sm mt-2 font-light tracking-wider uppercase">Sistema de Planilla v2.0</p>
+            </div>
+
+            <div class="p-8 pt-6">
+                <!-- ================== PASO 1: LOGIN NORMAL ================== -->
+                <form id="login-step1" class="space-y-6">
+                    <div class="group">
+                        <label class="block text-xs font-bold text-blue-100/70 uppercase tracking-wider mb-2 ml-1 group-focus-within:text-cyan-400 transition-colors">Correo Electrónico</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-blue-200/50 group-focus-within:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <input type="email" id="correo" name="correo" placeholder="ejemplo@munitai.gob.pe" required 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-white/10 rounded-xl text-blue-50 placeholder-blue-200/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-slate-900/70 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <div class="flex justify-between items-center mb-2 ml-1 pr-1">
+                            <label class="block text-xs font-bold text-blue-100/70 uppercase tracking-wider group-focus-within:text-cyan-400 transition-colors">Contraseña</label>
+                            <button type="button" id="btn-olvide" class="text-xs text-cyan-400 hover:text-cyan-300 hover:underline">¿Olvidaste tu contraseña?</button>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-blue-200/50 group-focus-within:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <input type="password" id="password" placeholder="••••••••" required 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-white/10 rounded-xl text-blue-50 placeholder-blue-200/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-slate-900/70 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-step1"
+                        class="w-full py-4 px-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/40 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-sm flex items-center justify-center gap-3 group">
+                        <span>Siguiente</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
+
+                <!-- ================== PASO 2: CÓDIGO OTP (2FA) ================== -->
+                <form id="login-step2" class="space-y-6 hidden-step">
+                    <p id="correo-mensaje" class="text-sm text-blue-200 text-center mb-4"></p>
+                    
+                    <div class="group">
+                        <label class="block text-xs font-bold text-blue-100/70 uppercase tracking-wider mb-2 ml-1 group-focus-within:text-cyan-400 transition-colors">Código de 6 dígitos</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-key text-blue-200/50 group-focus-within:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <input type="text" id="otp_code" placeholder="123456" maxlength="6" autocomplete="off"
+                                class="block w-full pl-11 pr-4 py-3.5 text-center tracking-[0.5em] text-xl font-bold bg-slate-900/50 border border-white/10 rounded-xl text-cyan-400 placeholder-blue-200/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-slate-900/70 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <button type="submit" id="btn-step2"
+                            class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/40 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-sm flex items-center justify-center gap-3 group">
+                            <span>Ingresar al Sistema</span>
+                            <i class="fas fa-check-circle group-hover:scale-110 transition-transform"></i>
+                        </button>
+                        
+                        <button type="button" class="btn-volver w-full py-3 px-4 bg-transparent border border-white/10 hover:bg-white/5 text-blue-200 font-medium rounded-xl transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ================== PASO 3: SOLICITAR RECUPERACIÓN ================== -->
+                <form id="forgot-step1" class="space-y-6 hidden-step">
+                    <p class="text-sm text-blue-200 text-center mb-4">Ingresa tu correo para recibir un código de recuperación.</p>
+                    
+                    <div class="group">
+                        <label class="block text-xs font-bold text-blue-100/70 uppercase tracking-wider mb-2 ml-1 group-focus-within:text-cyan-400 transition-colors">Correo Electrónico</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-blue-200/50 group-focus-within:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <input type="email" id="correo-recovery" placeholder="ejemplo@munitai.gob.pe"
+                                class="block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-white/10 rounded-xl text-blue-50 placeholder-blue-200/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-slate-900/70 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <button type="submit" id="btn-recovery1"
+                            class="w-full py-4 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-purple-600/40 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-sm flex items-center justify-center gap-3 group">
+                            <span>Enviar Código</span>
+                            <i class="fas fa-paper-plane group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                        
+                        <button type="button" class="btn-volver w-full py-3 px-4 bg-transparent border border-white/10 hover:bg-white/5 text-blue-200 font-medium rounded-xl transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Volver al Login
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ================== PASO 4: RESETEAR CONTRASEÑA ================== -->
+                <form id="forgot-step2" class="space-y-6 hidden-step">
+                    <p class="text-sm text-blue-200 text-center mb-4">Ingresa el código que recibiste y tu nueva contraseña.</p>
+                    
+                    <div class="group">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-key text-blue-200/50 group-focus-within:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <input type="text" id="recovery_otp" placeholder="CÓDIGO (6 dígitos)" maxlength="6" autocomplete="off"
+                                class="block w-full pl-11 pr-4 py-3.5 text-center tracking-widest font-bold bg-slate-900/50 border border-white/10 rounded-xl text-cyan-400 placeholder-blue-200/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-blue-200/50 group-focus-within:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <input type="password" id="new_password" placeholder="Nueva Contraseña"
+                                class="block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-white/10 rounded-xl text-blue-50 placeholder-blue-200/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <button type="submit" id="btn-recovery2"
+                            class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/40 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-sm flex items-center justify-center gap-3 group">
+                            <span>Guardar Contraseña</span>
+                            <i class="fas fa-save group-hover:scale-110 transition-transform"></i>
+                        </button>
+                        
+                        <button type="button" class="btn-volver w-full py-3 px-4 bg-transparent border border-white/10 hover:bg-white/5 text-blue-200 font-medium rounded-xl transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+            
+            <div class="px-8 py-4 bg-black/20 text-center border-t border-white/5">
+                <p class="text-xs text-blue-300/40">© 2026 Plataforma Segura RRHH DRXD</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const API_URL = '';
+    let currentCorreo = ''; 
+
+    // Formularios
+    const formStep1 = document.getElementById('login-step1');
+    const formStep2 = document.getElementById('login-step2');
+    const formForgot1 = document.getElementById('forgot-step1');
+    const formForgot2 = document.getElementById('forgot-step2');
+    const botonesVolver = document.querySelectorAll('.btn-volver');
+
+    const showAlert = (title, text, icon = 'error') => {
+        Swal.fire({ icon, title, text, background: '#1e293b', color: '#fff', confirmButtonColor: '#3b82f6' });
+    };
+
+    const changeView = (showForm, title, subtitle, icon) => {
+        [formStep1, formStep2, formForgot1, formForgot2].forEach(f => f.classList.add('hidden-step'));
+        showForm.classList.remove('hidden-step');
+        document.getElementById('header-title').innerText = title;
+        document.getElementById('header-subtitle').innerText = subtitle;
+        document.getElementById('header-icon').className = icon;
+    };
+
+    // --- FLUJO NORMAL DE LOGIN ---
+    formStep1.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const correoInput = document.getElementById('correo').value.trim();
+        const passwordInput = document.getElementById('password').value;
+        const btn = document.getElementById('btn-step1');
+        
+        // Extraemos la huella exclusiva para este correo
+        const dispositivoToken = localStorage.getItem('huella_' + correoInput);
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Procesando...';
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/login-step1`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    correo: correoInput, 
+                    password: passwordInput,
+                    dispositivo_token: dispositivoToken
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.skipOTP) {
+                    // Acceso directo: es un dispositivo de confianza
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('rol', data.rol); // Guardamos el rol
+                    
+                    try {
+                        await fetch(`${API_URL}/api/periodo-actual`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${data.token}` },
+                            body: JSON.stringify({ periodo: 'CERRAR' }) 
+                        });
+                    } catch (e) { console.warn("No se pudo limpiar el periodo."); }
+
+                    // === CORRECCIÓN AQUÍ ===
+                    localStorage.removeItem('periodo');
+
+                    window.location.href = 'index.html';
+                } else {
+                    // Dispositivo nuevo o incógnito: Pedimos código
+                    currentCorreo = correoInput;
+                    document.getElementById('correo-mensaje').innerHTML = `Hemos enviado un código a:<br><strong class="text-white">${data.correoOculto}</strong>`;
+                    changeView(formStep2, "Verificación", "Autenticación de 2 factores", "fas fa-envelope-open-text text-3xl text-white");
+                }
+            } else {
+                showAlert('Acceso Denegado', data.message);
+            }
+        } catch (error) {
+            showAlert('Error', 'No se pudo conectar con el servidor.');
+        } finally {
+            if (!btn.disabled) { // Solo restaurar si no redirigió
+                btn.disabled = false;
+                btn.innerHTML = '<span>Siguiente</span><i class="fas fa-arrow-right"></i>';
+            }
+        }
+    });
+
+    formStep2.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const otpInput = document.getElementById('otp_code').value.trim();
+        const btn = document.getElementById('btn-step2');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Verificando...';
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/login-step2`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: currentCorreo, otp: otpInput }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Ya no hacemos localStorage.clear() para no borrar las huellas de otras cuentas
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('rol', data.rol); // Guardamos el rol
+                
+                // Guardamos la nueva huella atada al correo específico
+                if (data.dispositivo_token) {
+                    localStorage.setItem('huella_' + currentCorreo, data.dispositivo_token);
+                }
+
+                try {
+                    await fetch(`${API_URL}/api/periodo-actual`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${data.token}` },
+                        body: JSON.stringify({ periodo: 'CERRAR' }) 
+                    });
+                } catch (e) { console.warn("No se pudo limpiar el periodo."); }
+
+                // === CORRECCIÓN AQUÍ ===
+                localStorage.removeItem('periodo');
+
+                window.location.href = 'index.html';
+            } else {
+                showAlert('Error', data.message);
+                btn.disabled = false;
+                btn.innerHTML = '<span>Ingresar al Sistema</span><i class="fas fa-check-circle"></i>';
+            }
+        } catch (error) {
+            showAlert('Error', 'No se pudo conectar con el servidor.');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Ingresar al Sistema</span><i class="fas fa-check-circle"></i>';
+        }
+    });
+
+    // --- FLUJO DE RECUPERACIÓN ---
+    document.getElementById('btn-olvide').addEventListener('click', () => {
+        changeView(formForgot1, "Recuperación", "Restablecer Contraseña", "fas fa-key text-3xl text-white");
+    });
+
+    formForgot1.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const correoInput = document.getElementById('correo-recovery').value.trim();
+        const btn = document.getElementById('btn-recovery1');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Enviando...';
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/olvide-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: correoInput }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                currentCorreo = correoInput;
+                changeView(formForgot2, "Nueva Contraseña", "Ingresa el código enviado", "fas fa-unlock-alt text-3xl text-white");
+            } else {
+                showAlert('Error', data.message);
+            }
+        } catch (error) {
+            showAlert('Error', 'No se pudo conectar con el servidor.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Enviar Código</span><i class="fas fa-paper-plane"></i>';
+        }
+    });
+
+    formForgot2.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const otpInput = document.getElementById('recovery_otp').value.trim();
+        const newPassword = document.getElementById('new_password').value;
+        const btn = document.getElementById('btn-recovery2');
+
+        if(newPassword.length < 5) return showAlert('Error', 'La contraseña debe tener al menos 5 caracteres');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Guardando...';
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: currentCorreo, otp: otpInput, nuevaContrasena: newPassword }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                Swal.fire({ icon: 'success', title: '¡Éxito!', text: data.message, background: '#1e293b', color: '#fff', confirmButtonColor: '#10b981' })
+                .then(() => {
+                    document.getElementById('login-step1').reset();
+                    changeView(formStep1, "Bienvenido", "Sistema de Planilla v2.0", "fas fa-user-shield text-3xl text-white");
+                });
+            } else {
+                showAlert('Error', data.message);
+            }
+        } catch (error) {
+            showAlert('Error', 'No se pudo conectar con el servidor.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Guardar Contraseña</span><i class="fas fa-save"></i>';
+        }
+    });
+
+    // --- BOTONES VOLVER ---
+    botonesVolver.forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('login-step1').reset();
+            document.getElementById('login-step2').reset();
+            document.getElementById('forgot-step1').reset();
+            document.getElementById('forgot-step2').reset();
+            changeView(formStep1, "Bienvenido", "Sistema de Planilla v2.0", "fas fa-user-shield text-3xl text-white");
+        });
+    });
+</script>
+</body>
+</html>

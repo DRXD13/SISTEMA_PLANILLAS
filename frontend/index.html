@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Planilla de Empleados</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* El preflight de Tailwind deja los botones de SweetAlert con fondo transparente (texto blanco invisible) */
+        .swal2-container .swal2-styled.swal2-confirm { background-color: var(--swal2-confirm-button-background-color, #7066e0); }
+        .swal2-container .swal2-styled.swal2-cancel { background-color: var(--swal2-cancel-button-background-color, #6e7881); }
+        .swal2-container .swal2-styled.swal2-deny { background-color: var(--swal2-deny-button-background-color, #dc3741); }
+        body {
+            background-color: #f1f5f9;
+        }
+        .sidebar {
+            width: 220px;
+        }
+        .main-content {
+            margin-left: 220px;
+        }
+        .swal2-popup {
+            font-size: 0.8rem;
+        }
+        #tabla-personas th,
+        #tabla-profesiones th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #4b5563;
+            font-size: 0.75rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+        }
+        .sidebar a {
+            transition: background-color 0.2s;
+        }
+        .sidebar a.active-link {
+            background-color: #4b5563;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="periodoModalOverlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-[#0f172a]/95 backdrop-blur-sm transition-all duration-500">
+    
+    <div class="bg-white w-full max-w-6xl mx-6 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row h-[85vh] max-h-[800px]">
+        
+        <div class="lg:w-1/3 bg-gradient-to-br from-blue-700 to-indigo-900 p-10 text-white flex flex-col justify-between relative overflow-hidden shrink-0">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
+            <div class="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500/20 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
+            
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 border border-white/20 shadow-inner">
+                    <i class="fas fa-rocket text-3xl text-cyan-300"></i>
+                </div>
+                <h2 class="text-4xl font-bold mb-2 tracking-tight">Bienvenido</h2>
+                <p class="text-blue-100 text-lg opacity-90">Panel de Gestión RRHH</p>
+            </div>
+
+            <div class="relative z-10 mt-10 lg:mt-0">
+                <p class="text-sm text-blue-200/60 uppercase tracking-widest font-semibold mb-4">Estado del Sistema</p>
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                        <span class="text-sm font-medium">Base de Datos: Conectada</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+                        <span class="text-sm font-medium">Servidor: En línea</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:w-2/3 bg-slate-50 flex flex-col h-full overflow-hidden">
+            
+            <div class="p-8 pb-4 shrink-0">
+                <h3 class="text-2xl font-bold text-slate-800 mb-1">Configuración de Período</h3>
+                <p class="text-slate-500 text-sm">Selecciona el año y mes para cargar la planilla correspondiente.</p>
+            </div>
+
+            <div class="px-8 pb-8 flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
+                
+                <div class="flex flex-col gap-4 h-full overflow-hidden">
+                    
+                    <div class="bg-white p-1 rounded-xl border border-slate-200 shadow-sm shrink-0">
+                        <label class="block text-xs font-bold text-slate-400 px-3 pt-2 uppercase">Año Fiscal</label>
+                        <select id="periodo-ano" class="w-full bg-transparent border-none text-slate-700 font-bold text-xl focus:ring-0 cursor-pointer py-2 px-3">
+                            </select>
+                    </div>
+
+                    <div class="flex-1 flex flex-col min-h-0 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="flex justify-between items-end p-3 pb-2 border-b border-slate-100 bg-slate-50/50 shrink-0">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Meses Disponibles</label>
+                            <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">Clic para seleccionar</span>
+                        </div>
+                        <ul id="lista-meses" class="overflow-y-auto p-2 space-y-1 custom-scrollbar flex-1">
+                            </ul>
+                    </div>
+                </div>
+
+                <div class="flex flex-col h-full overflow-hidden">
+                    <label class="flex items-center text-xs font-bold text-slate-500 uppercase mb-3 shrink-0">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i> Período a Abrir
+                    </label>
+                    
+                    <div class="flex-1 bg-slate-100 rounded-2xl border border-slate-200 p-4 relative overflow-hidden flex flex-col min-h-0">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #f0f0f0 25%, #f0f0f0 75%, #000 75%, #000); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+                        
+                        <ul id="periodo-seleccionado-lista" class="relative z-10 space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-2">
+                            <li class="h-full flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-300 rounded-xl min-h-[150px]">
+                                <i class="far fa-calendar text-4xl mb-2 opacity-50"></i>
+                                <span class="text-sm font-medium">Nada seleccionado</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button id="btn-iniciar-periodo" class="mt-4 w-full py-4 bg-slate-900 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xl shadow-blue-900/20 transform active:scale-95 transition-all duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 shrink-0">
+                        <span class="mr-2">Iniciar Sistema</span>
+                        <i class="fas fa-bolt text-yellow-400 group-hover:animate-pulse"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos Específicos para los Items Generados por JS */
+    
+    /* Meses Izquierda */
+    #lista-meses li {
+        padding: 10px 14px;
+        margin-bottom: 4px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+    }
+    #lista-meses li:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        transform: translateX(5px);
+        border-color: #e2e8f0;
+    }
+    /* Decoración círculo pequeño */
+    #lista-meses li::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #cbd5e1;
+        margin-right: 10px;
+        transition: background-color 0.2s;
+    }
+    #lista-meses li:hover::before {
+        background-color: #3b82f6;
+    }
+
+    /* Período Seleccionado Derecha (Tarjeta "Ticket") */
+    #periodo-seleccionado-lista li {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border-left: 5px solid #3b82f6; /* Borde azul */
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: slideIn 0.3s ease-out forwards;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estado Activo (Verde) - JS suele poner clase bg-green-200, vamos a mejorarla */
+    #periodo-seleccionado-lista li.bg-green-200 {
+        background: #f0fdf4 !important;
+        border-left-color: #22c55e !important;
+        color: #15803d !important;
+        box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
+    }
+
+    /* Scrollbar minimalista */
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+<div id="app-container" class="hidden">
+
+<aside class="sidebar fixed top-0 left-0 h-full bg-gray-900 text-white p-4 z-10">
+    <h1 class="text-xl font-bold mb-6 text-center tracking-wider text-blue-400">MENU PRINCIPAL</h1>
+<nav class="space-y-2">
+    
+    <a id="link-persona" href="index.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+        <i class="fas fa-user w-6 text-center mr-2 text-gray-400"></i>
+        <span class="font-medium">Persona</span>
+    </a>
+    
+    <button type="button" class="flex items-center w-full py-3 px-4 rounded hover:bg-gray-800 transition-colors text-left" 
+            data-collapse-toggle="dropdown-mantenimiento">
+        <i class="fas fa-tools w-6 text-center mr-2 text-gray-400"></i>
+        <span class="font-medium flex-1">Mantenimiento</span>
+        <i class="fas fa-chevron-down text-xs text-gray-500 ml-auto"></i>
+    </button>
+    
+    <ul id="dropdown-mantenimiento" class="hidden py-2 space-y-1 bg-gray-800 rounded ml-4 mt-1">
+        <li>
+            <a href="mantenimiento-profesion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                <i class="fas fa-graduation-cap w-5 mr-2 text-center text-xs"></i> Profesión
+            </a>
+        </li>
+        <li>
+            <a href="mantenimiento-area.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                <i class="fas fa-building w-5 mr-2 text-center text-xs"></i> Área
+            </a>
+        </li>
+        <li>
+            <a href="mantenimiento-cargos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                <i class="fas fa-briefcase w-5 mr-2 text-center text-xs"></i> Cargos
+            </a>
+        </li>
+        <li>
+            <a href="mantenimiento-grupo-ocupacional.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                <i class="fas fa-layer-group w-5 mr-2 text-center text-xs"></i> Grupo Ocup.
+            </a>
+        </li>
+        <li>
+            <a href="mantenimiento-sistemas-pensiones.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                <i class="fas fa-piggy-bank w-5 mr-2 text-center text-xs"></i> Sist. Pensiones
+            </a>
+        </li>
+        <li>
+                <a href="mantenimiento-meta.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-bullseye w-5 mr-2 text-center text-xs"></i> Metas
+                </a>
+            </li>
+            <li>
+    <a href="mantenimiento-conceptos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+        <i class="fas fa-list-ul w-5 mr-2 text-center text-xs"></i> Conceptos
+    </a>
+</li>
+<li><a href="mantenimiento-entidad.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-university w-5 mr-2 text-center text-xs"></i> Entidades Fin.</a></li>
+    <li><a href="mantenimiento-configuracion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-cogs w-5 mr-2 text-center text-xs"></i> Configuración</a></li>
+<li>
+    <a href="mantenimiento-sindicatos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+        <i class="fas fa-users w-5 mr-2 text-center text-xs"></i> Sindicatos
+    </a>
+</li>
+</ul>
+    
+<a id="link-empleados" href="mantenimiento-empleados.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-id-card w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium">Trabajadores</span>
+        </a>
+
+<a id="link-comisiones-spp" href="mantenimiento-comisiones-spp.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+        <i class="fas fa-chart-line w-6 text-center mr-2 text-gray-400"></i>
+        <span class="font-medium">Comisiones SPP</span>
+    </a>
+
+    <a id="link-asistencias" href="control-asistencias.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+        <i class="fas fa-calendar-check w-6 text-center mr-2 text-gray-400"></i>
+        <span class="font-medium">Asistencias</span>
+    </a>
+    <a id="link-judiciales" href="judiciales.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+    <i class="fas fa-gavel w-6 text-center mr-2 text-gray-400"></i> <span class="font-medium">Judiciales</span>
+</a>
+<a id="link-prestamos" href="prestamos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-hand-holding-usd w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium">Préstamos</span>
+        </a>
+    <a id="link-planilla" href="calculo-planilla.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors border-l-4 border-transparent hover:border-indigo-500">
+        <i class="fas fa-calculator w-6 text-center mr-2 text-gray-400"></i>
+        <span class="font-medium">Planilla</span>
+    </a>
+    <a id="link-sindicatos-operacion" href="sindicatos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors border-l-4 border-transparent hover:border-pink-500">
+    <i class="fas fa-handshake w-6 text-center mr-2 text-gray-400"></i>
+    <span class="font-medium">Sindicate</span>
+</a>
+</nav>
+    
+    <div class="absolute bottom-0 left-0 w-full p-4 text-center text-xs text-gray-600 border-t border-gray-800">
+        v2.0 Sistema RRHH
+    </div>
+</aside>
+
+    <div class="main-content min-h-screen">
+        <header class="bg-blue-600 text-white p-4 flex justify-between items-center shadow">
+            <h2 class="text-lg font-semibold">
+    Panel Administrativo 
+    <span id="periodo-actual" class="ml-4 text-sm font-normal bg-blue-700 px-3 py-1 rounded shadow-sm">
+        </span>
+</h2>
+            <div class="relative inline-block text-left">
+                <img src="avatar.png" alt="Usuario"
+                    class="w-10 h-10 rounded-full border-2 border-white cursor-pointer" onclick="toggleDropdown()">
+<div id="user-dropdown"
+                    class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg overflow-hidden z-50">
+                    <div class="px-4 py-2 text-gray-700 border-b">
+                        <span id="user-name" class="font-semibold">Usuario: -</span>
+                    </div>
+                    
+                    <!-- NUEVO BOTÓN DE GESTIÓN DE USUARIOS -->
+                    <a href="gestion-usuarios.html" id="btn-gestion-usuarios" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        👥 Gestión de Usuarios
+                    </a>
+                    
+                    <button onclick="cambiarPeriodo()" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        🔄 Cambiar Período
+                    </button>
+                    <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div id="alert" class="hidden m-6 p-4 rounded-lg text-white text-center"></div>
+
+        <div id="seccion-persona" class="p-6">
+            <div id="busqueda-container" class="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">BÚSQUEDA DE PERSONA</h3>
+                <form id="form-buscar-persona" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="col-span-1">
+                        <label for="tipo_busqueda" class="block text-sm font-medium text-gray-700">Buscar por:</label>
+                        <select id="tipo_busqueda" class="border rounded p-2 w-full">
+                            <option value="dni">DNI</option>
+                            <option value="nombre">Nombre</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="valor_busqueda" class="block text-sm font-medium text-gray-700">Valor de
+                            Búsqueda</label>
+                        <div class="relative">
+                            <input type="text" id="valor_busqueda" placeholder="Ingrese el DNI o Nombre"
+                                class="border rounded p-2 w-full pr-10">
+                            <button type="button" id="limpiar_busqueda"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-span-1">
+                        <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
+                            BUSCAR
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="resultados-container" class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-700">Resultados de la Búsqueda</h3>
+                    
+                    <div class="flex space-x-2"> 
+                        <button onclick="abrirModalPersona('validar')"
+                            class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                            <i class="fas fa-edit"></i> EDITAR PERSONA
+                        </button>
+                        
+                        <button onclick="abrirModalPersona('crear')"
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            CREAR PERSONA
+                        </button>
+                    </div>
+                </div>
+                <!-- NUEVO: Barra de desplazamiento superior -->
+<div id="top-scroll-wrapper" class="overflow-x-auto custom-scrollbar mb-1" style="height: 14px; overflow-y: hidden;">
+    <div id="top-scroll-dummy" style="height: 1px;"></div>
+</div>
+                <div id="tabla-personas-container" class="overflow-x-auto">
+                    <table id="tabla-personas" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">FOTO</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">DNI</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">NOMBRE</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">APELLIDO</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">DIRECCIÓN</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">TELÉFONO</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">EMAIL</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">PROFESIÓN</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">SEXO</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">ESTADO CIVIL</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">FECHA NACIMIENTO</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">ESTADO</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider align-middle">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo-tabla-personas" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="seccion-profesion" class="p-6 hidden">
+             </div>
+    </div> 
+    
+<div id="personaModal" class="modal">
+        <div class="modal-content max-w-sm md:max-w-xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 id="modal-title-persona" class="text-2xl font-semibold text-gray-800"></h3>
+                <button type="button"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+                    onclick="cerrarModalPersona()">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="validacion-container" style="display: none;">
+                <form id="form-validar-persona" class="max-w-md mx-auto">
+                    <div class="mb-4">
+                        <label for="validar_dni" class="block text-sm font-medium text-gray-700">DNI</label>
+                        <input type="text" id="validar_dni" name="dni" class="border rounded p-2 w-full mt-1" required>
+                    </div>
+                    
+                   <div class="flex flex-col md:flex-row justify-end space-y-2 md:space-y-0 md:space-x-2">
+        
+        <button type="button" onclick="cerrarModalPersona()"
+            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+            Cancelar
+        </button>
+        <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Validar y Editar
+        </button>
+    </div>
+                </form>
+            </div>
+
+<div id="formulario-persona-container" style="display: none;">
+    <form id="form-persona">
+        <div id="campos-persona" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" id="persona_id" name="persona_id">
+            <!-- agregado para mantener historial de estado -->
+            <input type="hidden" id="estado_actual_historico" name="estado_actual_historico">
+            <div>
+                <label for="dni" class="block text-sm font-medium text-gray-700">DNI</label>
+                <input type="text" id="dni" name="dni" class="border rounded p-2 w-full mt-1" required>
+            </div>
+            <div id="div-contrasena">
+                <label for="contrasena" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                <input type="password" id="contrasena" name="contrasena" class="border rounded p-2 w-full mt-1">
+            </div>
+           <div class="col-span-2 flex justify-start">
+        <button type="button" id="btnReniecConsultar" onclick="consultarReniec()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Consultar RENIEC
+        </button>
+    </div>
+            <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="nombre" name="nombre" class="border rounded p-2 w-full mt-1" required>
+            </div>
+            <div>
+                <label for="apellido_paterno" class="block text-sm font-medium text-gray-700">Apellido Paterno</label>
+                <input type="text" id="apellido_paterno" name="apellido_paterno" class="border rounded p-2 w-full mt-1" required>
+            </div>
+            <div>
+                <label for="apellido_materno" class="block text-sm font-medium text-gray-700">Apellido Materno</label>
+                <input type="text" id="apellido_materno" name="apellido_materno" class="border rounded p-2 w-full mt-1" required>
+            </div>
+            <div>
+                <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo</label>
+                <select id="sexo" name="sexo" class="border rounded p-2 w-full mt-1">
+                    <option value="">Seleccione...</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                </select>
+            </div>
+    <div>
+        <label for="estado_civil" class="block text-sm font-medium text-gray-700">Estado Civil</label>
+        <select id="estado_civil" name="estado_civil" class="border rounded p-2 w-full mt-1">
+            <option value="">Seleccione...</option>
+        </select>
+    </div>
+            <div>
+                <label for="fecha_nacimiento" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" class="border rounded p-2 w-full mt-1">
+            </div>
+            <div>
+                <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
+                <input type="text" id="direccion" name="direccion" class="border rounded p-2 w-full mt-1">
+            </div>
+            <div>
+                <label for="ubigeo" class="block text-sm font-medium text-gray-700">Ubigeo</label>
+                <input type="text" id="ubigeo" name="ubigeo" class="border rounded p-2 w-full mt-1">
+            </div>
+            <input type="hidden" id="foto" name="foto">
+            <div>
+                <label for="celular" class="block text-sm font-medium text-gray-700">Celular</label>
+                <input type="text" id="celular" name="celular" class="border rounded p-2 w-full mt-1">
+            </div>
+            <div>
+        <label for="profesion" class="block text-sm font-medium text-gray-700">Profesión</label>
+    <select id="profesion" name="profesion" class="border rounded p-2 w-full mt-1">
+        <option value="">Seleccione una profesión</option>
+    </select>
+    </div>
+            <div>
+                <label for="correo" class="block text-sm font-medium text-gray-700">Correo</label>
+                <input type="email" id="correo" name="correo" class="border rounded p-2 w-full mt-1">
+            </div>
+            <div>
+                <label for="estado" class="block text-sm font-medium text-gray-700">Estado</label>
+                <select id="estado" name="estado" class="border rounded p-2 w-full mt-1">
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-span-2 flex justify-end mt-4 space-x-2">
+            <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" onclick="cerrarModalPersona()">
+                Cancelar
+            </button>
+            <button type="submit" id="submit-button-persona" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Guardar Persona
+            </button>
+        </div>
+    </form>
+</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="profesionModal" class="modal">
+         </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<script src="seguridad-roles.js"></script>
+</body>
+</html>
+
+<script>
+    // ===============================================
+    // === CÓDIGO FINAL DE INDEX.HTML (MEMORIA EN BD) ===
+    // ===============================================
+    
+    // ===============================================
+    // === VARIABLES GLOBALES ===
+    // ===============================================
+    const API_URL = ''; 
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+
+    // (Variables del DOM se asignan dentro de DOMContentLoaded)
+    let personaModal, formPersona, formValidarPersona, formBuscarPersona, limpiarBusquedaPersonaBtn;
+    let modalOverlay, appContainer, anoSelect, mesList, periodoLista, iniciarBtn;
+
+    // En index.html, sección de VARIABLES GLOBALES
+    let periodoActivoSeleccionado = null; 
+    let historialMovidosCache = {};
+    let personasCache = []; // caché local para buscar sin pedir al servidor (mejor rendimiento)
+
+    const MESES_BASE = [
+        { nombre: 'Enero', texto: '1. Enero' },
+        { nombre: 'Enero-utiles', texto: '1. Enero - utiles' },
+        { nombre: 'Febrero', texto: '2. Febrero' },
+        { nombre: 'Marzo', texto: '3. Marzo' },
+        { nombre: 'Abril', texto: '4. Abril' },
+        { nombre: 'Mayo', texto: '5. Mayo' },
+        { nombre: 'Junio', texto: '6. Junio' },
+        { nombre: 'Julio-grati', texto: '6. Julio - grati' },
+        { nombre: 'Julio', texto: '7. Julio' },
+        { nombre: 'Agosto', texto: '8. Agosto' },
+        { nombre: 'Septiembre', texto: '9. Septiembre' },
+        { nombre: 'Octubre', texto: '10. Octubre' },
+        { nombre: 'Noviembre', texto: '11. Noviembre' },
+        { nombre: 'Diciembre', texto: '12. Diciembre' },
+        { nombre: 'Diciembre-grati', texto: '12. Diciembre - grati' }
+    ];
+    
+    // ========================================================
+    // === ¡FUNCIONES GLOBALES PARA ONCLICK! ===
+    // ========================================================
+
+    function mostrarAlerta(mensaje, icono) {
+        Swal.fire({
+            title: 'Información',
+            text: mensaje,
+            icon: icono,
+            confirmButtonText: 'Aceptar'
+        });
+    }
+
+    function abrirModalPersona(modo) {
+        // (Aseguramos que las variables existan antes de usarlas)
+        if (!formValidarPersona || !formPersona || !personaModal) {
+             console.error("Error: Elementos del modal de persona no cargados.");
+             return;
+        }
+        
+        const modalTitle = document.getElementById('modal-title-persona');
+        const validacionContainer = document.getElementById('validacion-container');
+        const formularioPersonaContainer = document.getElementById('formulario-persona-container');
+        const divContrasena = document.getElementById('div-contrasena');
+        const contrasenaInput = document.getElementById('contrasena');
+        const submitButton = document.getElementById('submit-button-persona');
+        const btnReniec = document.getElementById('btnReniecConsultar');
+        
+        formValidarPersona.reset();
+        formPersona.reset();
+        
+        document.getElementById('persona_id').value = '';
+        document.getElementById('estado_actual_historico').value = '';
+        if (modo === 'crear') {
+            modalTitle.textContent = 'Crear Nueva Persona';
+            document.getElementById('foto').value = '';
+            document.getElementById('dni').readOnly = false;
+            if (btnReniec) btnReniec.style.display = 'inline-block';
+            if (divContrasena) divContrasena.style.display = 'block';
+            if (contrasenaInput) contrasenaInput.setAttribute('required', 'required');
+            submitButton.textContent = 'Guardar Persona';
+            submitButton.classList.remove('bg-blue-600');
+            submitButton.classList.add('bg-green-600');
+            validacionContainer.style.display = 'none';
+            formularioPersonaContainer.style.display = 'block';
+        } else if (modo === 'validar') {
+            modalTitle.textContent = 'Validar para Editar';
+            if (btnReniec) btnReniec.style.display = 'none';
+            validacionContainer.style.display = 'block';
+            formularioPersonaContainer.style.display = 'none';
+        }
+        personaModal.style.display = 'block';
+    }
+
+    function cerrarModalPersona() {
+        personaModal.style.display = 'none';
+        if (formPersona) formPersona.reset();
+        if (formValidarPersona) formValidarPersona.reset();
+        actualizarEstadoCivil();
+    }
+
+async function consultarReniec() {
+        const dni = document.getElementById('dni').value;
+        if (dni.length !== 8) return mostrarAlerta('El DNI debe tener 8 dígitos.', 'warning');
+        
+        // --- CORRECCIÓN: Limpiar campos ANTES de buscar ---
+        document.getElementById('nombre').value = '';
+        document.getElementById('apellido_paterno').value = '';
+        document.getElementById('apellido_materno').value = '';
+        document.getElementById('direccion').value = '';
+        document.getElementById('ubigeo').value = '';
+        document.getElementById('foto').value = ''; // <--- IMPORTANTE: Borra la foto anterior
+        document.getElementById('celular').value = '';
+        document.getElementById('fecha_nacimiento').value = '';
+        // --------------------------------------------------
+
+        try {
+            const response = await fetch(`${API_URL}/reniec-consulta/${dni}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.mensaje || 'Error al obtener datos de RENIEC.');
+            
+            document.getElementById('nombre').value = data.nombre;
+            document.getElementById('apellido_paterno').value = data.apellido_paterno;
+            document.getElementById('apellido_materno').value = data.apellido_materno;
+            document.getElementById('direccion').value = data.direccion;
+            document.getElementById('ubigeo').value = data.ubigeo;
+            document.getElementById('foto').value = data.foto;
+            document.getElementById('celular').value = data.celular;
+            document.getElementById('fecha_nacimiento').value = data.fecha_nacimiento;
+            
+            mostrarAlerta('Datos de RENIEC cargados con éxito.', 'success');
+        } catch (error) {
+            mostrarAlerta('No se pudo conectar con el servidor o DNI no encontrado.', 'error');
+        }
+    }
+    // En index.html: cambiar estado persona (usa API nueva que recibe periodo)
+    async function cambiarEstadoPersona(persona) {
+        const nuevoEstado = persona.estado === 'activo' ? 'inactivo' : 'activo';
+        const nombreCompleto = `${persona.nombre || ''} ${persona.apellido_paterno || ''}`.trim();
+        const periodo = localStorage.getItem('periodo');
+
+        Swal.fire({
+            title: `¿Estás seguro?`,
+            html: `Vas a cambiar el estado de <strong>${nombreCompleto}</strong> a <strong>${nuevoEstado}</strong><br>
+                    a partir del período <strong>${periodo}</strong>.<br><br>
+                    <span style="font-size: 0.9em; color: #555;">Esto afectará a este mes y todos los meses futuros (hasta que lo vuelvas a cambiar).</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: `Sí, poner ${nuevoEstado}`,
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${API_URL}/personas/cambiar-estado`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ 
+                            persona_id: persona.id,
+                            nuevo_estado: nuevoEstado,
+                            periodo: periodo
+                        })
+                    });
+                    const resData = await res.json();
+                    if (!res.ok) throw new Error(resData.message || 'Error al actualizar el estado.');
+                    
+                    mostrarAlerta(resData.message, 'success');
+                    cargarPersonas(); // Recarga la tabla
+                } catch (err) {
+                    mostrarAlerta(err.message, 'error');
+                }
+            }
+        });
+    }
+
+    // abrirModalParaEditar: soporta tanto (dni string) como (objeto persona)
+    async function abrirModalParaEditar(param) {
+        if (personaModal) {
+            personaModal.style.display = 'block';
+        }
+        document.getElementById('validacion-container').style.display = 'none';
+        document.getElementById('formulario-persona-container').style.display = 'block';
+        const modalTitle = document.getElementById('modal-title-persona');
+        const submitButton = document.getElementById('submit-button-persona');
+        const divContrasena = document.getElementById('div-contrasena');
+        const contrasenaInput = document.getElementById('contrasena');
+        const btnReniec = document.getElementById('btnReniecConsultar');
+        modalTitle.textContent = 'Editar Persona';
+        if (btnReniec) btnReniec.style.display = 'none';
+        document.getElementById('dni').readOnly = true;
+        if (divContrasena) divContrasena.style.display = 'none';
+        if (contrasenaInput) contrasenaInput.removeAttribute('required');
+        submitButton.textContent = 'Actualizar Persona';
+        submitButton.classList.remove('bg-green-600');
+        submitButton.classList.add('bg-blue-600');
+        
+        // Si recibimos un objeto persona (desde la tabla caché), lo usamos para mostrar estado histórico
+        if (param && typeof param === 'object') {
+            document.getElementById('estado_actual_historico').value = param.estado || '';
+            document.getElementById('estado').value = param.estado || '';
+            // Cargamos profesiones y el resto de datos desde BD para consistencia
+            await cargarOpcionesProfesion(); 
+            await cargarDatosPersonaParaEdicion(param.dni);
+        } else {
+            // recibió DNI (string)
+            const dni = String(param || '');
+            // estado histórico lo cargaremos en cargarDatosPersonaParaEdicion
+            await cargarOpcionesProfesion();
+            await cargarDatosPersonaParaEdicion(dni);
+        }
+    }
+
+    function cerrarModalProfesion() { 
+        const profesionModal = document.getElementById('profesionModal');
+        const formProfesion = document.getElementById('form-profesion');
+        if(profesionModal) profesionModal.style.display = 'none';
+        if(formProfesion) formProfesion.reset();
+    }
+    
+function logout() {
+        // En lugar de hacer un "clear()" que borra todas las huellas, 
+        // solo destruimos las llaves que mantienen la sesión abierta.
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('rol');
+        localStorage.removeItem('periodo');
+        window.location.href = 'login.html';
+    }
+
+    function toggleDropdown() {
+        document.getElementById('user-dropdown').classList.toggle('hidden');
+    }
+
+async function cambiarPeriodo() {
+    const btn = document.querySelector('button[onclick="cambiarPeriodo()"]');
+    if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cerrando...';
+
+    // Borramos local
+    localStorage.removeItem('periodo');
+
+    try {
+        // AVISAMOS AL SERVIDOR (A la nueva ruta global)
+        await fetch(`${API_URL}/api/periodo-global`, { // <--- CAMBIO AQUÍ
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ periodo: 'CERRAR' })
+        });
+    } catch(e) { console.error(e); }
+
+    window.location.replace('index.html');
+}
+    
+    // ========================================================
+    // === FUNCIONES DE LÓGICA (AHORA GLOBALES) ===
+    // ========================================================
+
+async function cargarDatosPersonaParaEdicion(dni) {
+         try {
+            const res = await fetch(`${API_URL}/buscar-persona-modal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ dni: dni }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Error al cargar datos para editar.');
+            document.getElementById('persona_id').value = data.id || '';
+            document.getElementById('dni').value = data.dni || '';
+            document.getElementById('nombre').value = data.nombre || '';
+            document.getElementById('apellido_paterno').value = data.apellido_paterno || '';
+            document.getElementById('apellido_materno').value = data.apellido_materno || '';
+            document.getElementById('sexo').value = data.sexo || '';
+            actualizarEstadoCivil(); 
+            document.getElementById('estado_civil').value = data.estado_civil || '';
+            document.getElementById('fecha_nacimiento').value = data.fecha_nacimiento ? data.fecha_nacimiento.split('T')[0] : '';
+            document.getElementById('direccion').value = data.direccion || '';
+            document.getElementById('ubigeo').value = data.ubigeo || '';
+            document.getElementById('celular').value = data.celular || '';
+            document.getElementById('correo').value = data.correo || '';
+            // document.getElementById('estado').value = data.estado || ''; // <-- LÍNEA COMENTADA (ELIMINADA)
+            document.getElementById('foto').value = data.foto || '';
+            document.getElementById('profesion').value = data.profesion || '';
+            // Guardamos el estado histórico en el input oculto (si viene)
+            // document.getElementById('estado_actual_historico').value = data.estado || ''; // <-- LÍNEA COMENTADA (ELIMINADA)
+        } catch (err) {
+            mostrarAlerta(err.message, 'error');
+        }
+    }
+
+    async function cargarOpcionesProfesion() {
+        try {
+            const profesionSelect = document.getElementById('profesion');
+            const res = await fetch(`${API_URL}/profesiones`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                throw new Error('No se pudieron cargar las opciones de profesión.');
+            }
+            const profesiones = await res.json();
+            let opcionPorDefecto = profesionSelect.querySelector('option[value=""]');
+            if (!opcionPorDefecto) {
+                opcionPorDefecto = document.createElement('option');
+                opcionPorDefecto.value = "";
+                opcionPorDefecto.textContent = "Seleccione una profesión";
+            }
+            profesionSelect.innerHTML = ''; 
+            profesionSelect.appendChild(opcionPorDefecto); 
+            if (profesiones && profesiones.length > 0) {
+                profesiones.forEach(profesion => {
+                    if (profesion.estado === 'activo') {
+                        const option = document.createElement('option');
+                        option.value = profesion.descripcion; 
+                        option.textContent = profesion.descripcion; 
+                        profesionSelect.appendChild(option);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Error al cargar profesiones en el select:', err);
+        }
+    }
+
+    function actualizarEstadoCivil() {
+        const sexoSelect = document.getElementById('sexo');
+        const estadoCivilSelect = document.getElementById('estado_civil');
+        if (!sexoSelect || !estadoCivilSelect) return;
+        
+        const opcionesEstadoCivil = {
+            'Masculino': [{ value: 'Soltero', text: 'Soltero' }, { value: 'Casado', text: 'Casado' }, { value: 'Divorciado', text: 'Divorciado' }, { value: 'Viudo', text: 'Viudo' }],
+            'Femenino': [{ value: 'Soltera', text: 'Soltera' }, { value: 'Casada', text: 'Casada' }, { value: 'Divorciada', text: 'Divorciada' }, { value: 'Viuda', text: 'Viuda' }]
+        };
+        
+        const sexoSeleccionado = sexoSelect.value;
+        const valorActual = estadoCivilSelect.value;
+        estadoCivilSelect.innerHTML = '<option value="">Seleccione...</option>';
+        if (opcionesEstadoCivil[sexoSeleccionado]) {
+            opcionesEstadoCivil[sexoSeleccionado].forEach(opcion => {
+                const nuevaOpcion = document.createElement('option');
+                nuevaOpcion.value = opcion.value;
+                nuevaOpcion.textContent = opcion.text;
+                estadoCivilSelect.appendChild(nuevaOpcion);
+            });
+        }
+        estadoCivilSelect.value = valorActual;
+    }
+
+    function renderizarPersonas(personas) {
+        personasCache = personas; // actualizamos caché
+        const tbody = document.getElementById('cuerpo-tabla-personas');
+        if (!tbody) return; 
+        tbody.innerHTML = '';
+        if (personas && personas.length > 0) {
+            personas.forEach(persona => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-100';
+                const estadoBtnClass = persona.estado === 'activo' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600';
+                const estadoBtnText = persona.estado === 'activo' ? 'Activo' : 'Inactivo';
+                const fotoSrc = persona.foto ? `data:image/jpeg;base64,${persona.foto}` : 'avatar.png';
+                let fechaNac = 'N/A';
+                if (persona.fecha_nacimiento) {
+                    try {
+                        fechaNac = new Date(persona.fecha_nacimiento).toLocaleDateString('es-ES', { timeZone: 'UTC' });
+                    } catch(e) { console.error("Fecha inválida:", persona.fecha_nacimiento); }
+                }
+
+                // Construimos fila conservando la apariencia del original
+                const idTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.id || ''}</td>`;
+                const fotoTd = `<td class="px-6 py-4 align-middle"><img src="${fotoSrc}" alt="Foto" class="h-8 w-8 rounded-full"></td>`;
+                const dniTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.dni || ''}</td>`;
+                const nombreTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.nombre || ''}</td>`;
+                const apellidoTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${(persona.apellido_paterno || '') + ' ' + (persona.apellido_materno || '')}</td>`;
+                const direccionTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.direccion || ''}</td>`;
+                const celularTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.celular || ''}</td>`;
+                const correoTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.correo || ''}</td>`;
+                const profesionTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.profesion || ''}</td>`;
+                const sexoTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.sexo || ''}</td>`;
+                const estadoCivilTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${persona.estado_civil || ''}</td>`;
+                const fechaTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle">${fechaNac}</td>`;
+                const estadoBtnTd = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 align-middle"><button onclick='cambiarEstadoPersona(${JSON.stringify(persona)})' class="text-white font-bold py-1 px-3 rounded-full text-xs ${estadoBtnClass}">${estadoBtnText}</button></td>`;
+                // boton editar: llamamos a abrirModalParaEditar pasando el objeto persona (mantener lógica del modificado)
+                const editarBtnTd = `<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-middle"><button onclick='abrirModalParaEditar(${JSON.stringify(persona)})' class="text-blue-600 hover:text-blue-900 mr-2 bg-yellow-400 py-1 px-3 rounded text-white font-bold">Editar</button></td>`;
+
+                row.innerHTML = idTd + fotoTd + dniTd + nombreTd + apellidoTd + direccionTd + celularTd + correoTd + profesionTd + sexoTd + estadoCivilTd + fechaTd + estadoBtnTd + editarBtnTd;
+                tbody.appendChild(row);
+            });
+        } else {
+            tbody.innerHTML = `<tr><td colspan="15" class="text-center p-4 text-gray-500">No hay personas registradas.</td></tr>`;
+        }
+        // ======================================================
+        // NUEVO: Ajustar el ancho de la barra de scroll superior
+        // ======================================================
+        setTimeout(() => {
+            const table = document.getElementById('tabla-personas');
+            const dummy = document.getElementById('top-scroll-dummy');
+            if (table && dummy) {
+                dummy.style.width = table.scrollWidth + 'px';
+            }
+        }, 100);
+    }
+
+    // EN index.html
+    async function cargarPersonas() {
+        // ¡AHORA SE NECESITA EL PERÍODO!
+        const periodo = localStorage.getItem('periodo');
+        if (!periodo) {
+            // Esto no debería pasar si la lógica del modal de período está bien
+            mostrarAlerta('Error: No hay período seleccionado.', 'error');
+            return;
+        }
+
+        try {
+            // Se envía el período en la URL
+            const res = await fetch(`${API_URL}/personas?periodo=${periodo}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error('Error al cargar las personas.');
+            const personas = await res.json();
+            renderizarPersonas(personas); // Renderiza TODAS las personas
+        } catch (err) {
+            mostrarAlerta('Ocurrió un error al cargar los datos de las personas.', 'error');
+            renderizarPersonas([]);
+        }
+    }
+
+// ======================================================
+        // NUEVO: Sincronizar el scroll de arriba y el de abajo
+        // ======================================================
+        const topScroll = document.getElementById('top-scroll-wrapper');
+        const tableScroll = document.getElementById('tabla-personas-container');
+
+        if (topScroll && tableScroll) {
+            // Cuando mueves la barra de arriba, se mueve la tabla
+            topScroll.addEventListener('scroll', () => {
+                tableScroll.scrollLeft = topScroll.scrollLeft;
+            });
+            // Cuando mueves la tabla (abajo), se mueve la barra de arriba
+            tableScroll.addEventListener('scroll', () => {
+                topScroll.scrollLeft = tableScroll.scrollLeft;
+            });
+        }
+        // ======================================================
+// ===============================================
+    // === LÓGICA QUE ESPERA A QUE EL HTML CARGUE ===
+    // ===============================================
+document.addEventListener('DOMContentLoaded', async () => { // <--- Nota: Agregué 'async' aquí por si acaso
+
+    // --- Asignamos variables globales que dependen del DOM ---
+    personaModal = document.getElementById('personaModal');
+    formPersona = document.getElementById('form-persona');
+    formValidarPersona = document.getElementById('form-validar-persona');
+    formBuscarPersona = document.getElementById('form-buscar-persona');
+    limpiarBusquedaPersonaBtn = document.getElementById('limpiar_busqueda');
+    modalOverlay = document.getElementById('periodoModalOverlay');
+    appContainer = document.getElementById('app-container');
+    anoSelect = document.getElementById('periodo-ano');
+    mesList = document.getElementById('lista-meses'); 
+    periodoLista = document.getElementById('periodo-seleccionado-lista'); 
+    iniciarBtn = document.getElementById('btn-iniciar-periodo');
+
+    if (iniciarBtn) {
+        iniciarBtn.addEventListener('click', iniciarPeriodo);
+    }
+
+// ======================================================
+    // === EVENTO CORREGIDO: GUARDA EN DB ===
+    // ======================================================
+    if (anoSelect) {
+        anoSelect.addEventListener('change', async () => {
+            const nuevoAnio = anoSelect.value;
+            
+            // 1. Guardamos en la BASE DE DATOS (Sin bloquear la pantalla)
+            try {
+                fetch(`${API_URL}/api/configuracion/anio-ui`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ anio: nuevoAnio })
+                });
+            } catch (e) {
+                console.error("No se pudo guardar el año en BD", e);
+            }
+            
+            // 2. Recargamos los meses inmediatamente
+            popularMeses(); 
+        });
+    }
+    // ======================================================
+
+    // --- Lógica de Inicialización ---
+    if (!token) {
+        window.location.href = 'login.html'; 
+    } else {
+        const rolUsuario = localStorage.getItem('rol') || 'Administrador';
+document.getElementById('user-name').textContent = `Rol: ${rolUsuario}`;
+        inicializarSistema(); 
+    }
+
+// ===============================================
+// === INICIALIZACIÓN SIN PARPADEOS (ZERO FLASH) ===
+// ===============================================
+async function inicializarSistema() {
+    console.log("=== INICIO DE SISTEMA ===");
+    
+    // 1. LEEMOS LA MEMORIA SILENCIOSAMENTE
+    const periodoGuardado = localStorage.getItem('periodo');
+
+    // Referencias a los elementos (que ahora ambos tienen class="hidden" en el HTML)
+    const overlay = document.getElementById('periodoModalOverlay');
+    const app = document.getElementById('app-container');
+
+    if (periodoGuardado) {
+        // --- ESCENARIO A: YA TIENE PERIODO ---
+        console.log("✅ Sesión activa:", periodoGuardado);
+
+        // Actualizamos texto del header
+        const lblPeriodo = document.getElementById('periodo-actual');
+        if(lblPeriodo) lblPeriodo.textContent = `Período: ${periodoGuardado}`;
+
+        // ¡MAGIA! Solo encendemos la App. El modal nunca se vio.
+        app.classList.remove('hidden');
+
+        // Cargamos datos en segundo plano
+        if (typeof cargarPersonas === "function") await cargarPersonas();
+        if (typeof cargarOpcionesProfesion === "function") await cargarOpcionesProfesion();
+
+    } else {
+        // --- ESCENARIO B: NO HAY PERIODO ---
+        console.log("⚠️ Sin sesión. Solicitando periodo.");
+        
+        // Cargar listas antes de mostrar para que se vea bonito
+        popularAnos(); 
+        
+        // ¡MAGIA! Solo encendemos el Modal. La App sigue oculta.
+        overlay.classList.remove('hidden');
+    }
+}
+
+// Hacemos la función ASYNC para poder esperar a la base de datos
+async function popularAnos() {
+    if (!anoSelect) return;
+    anoSelect.innerHTML = '';
+
+    const anoInicioSistema = 2024;
+    const anoActual = new Date().getFullYear();
+    const anoFin = anoActual + 1; 
+
+    // 1. Dibujamos las opciones (Igual que antes)
+    for (let i = anoInicioSistema; i <= anoFin; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        anoSelect.appendChild(option);
+    }
+
+    // 2. CONECTAMOS CON LA BASE DE DATOS PARA VER QUÉ AÑO SELECCIONAR
+    try {
+        const res = await fetch(`${API_URL}/api/configuracion/anio-ui`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            // Si la BD tiene un año guardado (y es válido en nuestra lista), lo usamos
+            if (data.anio && parseInt(data.anio) >= anoInicioSistema && parseInt(data.anio) <= anoFin) {
+                anoSelect.value = data.anio;
+            } else {
+                anoSelect.value = anoActual.toString(); // Si no, año actual
+            }
+        } else {
+             anoSelect.value = anoActual.toString();
+        }
+    } catch (error) {
+        console.error("Error al recuperar año de la BD:", error);
+        anoSelect.value = anoActual.toString();
+    }
+    
+    // 3. Importante: Disparamos la carga de meses para el año que quedó seleccionado
+    popularMeses();
+}
+
+        // === ¡FUNCIÓN CORREGIDA! (AHORA USA FETCH) ===
+        async function popularMeses() {
+            if (!mesList || !anoSelect || !periodoLista) return;
+
+            const anoSeleccionado = anoSelect.value;
+            
+            // 1. Carga el historial de meses movidos desde LA BASE DE DATOS
+            try {
+                const res = await fetch(`${API_URL}/api/periodos-movidos`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    throw new Error("No se pudo cargar el historial de períodos.");
+                }
+                historialMovidosCache = await res.json(); // Carga el historial en el caché
+            } catch (error) {
+                console.error(error);
+                historialMovidosCache = {}; // Si falla, usa un historial vacío
+            }
+
+            const movidosEsteAno = historialMovidosCache[anoSeleccionado] || []; 
+
+            mesList.innerHTML = ''; 
+            periodoLista.innerHTML = ''; 
+
+            let mesesDisponibles = 0;
+            let mesesMovidos = 0;
+
+            MESES_BASE.forEach((mes) => {
+                
+                if (movidosEsteAno.includes(mes.nombre)) {
+                    // --- Si el mes YA FUE MOVIDO, lo pone en la Lista 3 ---
+                    const li = document.createElement('li');
+                    li.textContent = `${anoSeleccionado}-${mes.nombre}`;
+                    li.dataset.periodo = `${anoSeleccionado}-${mes.nombre}`;
+                    li.className = "cursor-pointer p-2 hover:bg-green-100 rounded-md";
+                    li.addEventListener('click', () => seleccionarPeriodoFinal(li));
+                    li.addEventListener('dblclick', () => devolverMes(li)); 
+                    periodoLista.appendChild(li);
+                    mesesMovidos++;
+                } else {
+                    // --- Si el mes NO HA SIDO MOVIDO, lo pone en la Lista 2 ---
+                    const li = document.createElement('li');
+                    li.textContent = mes.texto; 
+                    li.dataset.mesNombre = mes.nombre;
+                    li.className = "cursor-pointer p-2 hover:bg-blue-100 rounded-md";
+                    li.addEventListener('click', () => moverMes(li)); 
+                    mesList.appendChild(li);
+                    mesesDisponibles++;
+                }
+            });
+
+            if (mesesDisponibles === 0) {
+                mesList.innerHTML = '<li class="p-2 text-gray-400 text-center italic">Todos los meses han sido movidos.</li>';
+            }
+            if (mesesMovidos === 0) {
+                periodoLista.innerHTML = '<li class="p-2 text-gray-400 text-center italic">Seleccione un mes de la izquierda...</li>';
+            }
+            
+            if (iniciarBtn) iniciarBtn.disabled = true;
+            periodoActivoSeleccionado = null;
+        }
+
+        // === ¡FUNCIÓN CORREGIDA! (AHORA USA FETCH) ===
+        async function moverMes(liElemento) {
+            if (!periodoLista) return;
+            const ano = anoSelect.value; 
+            const mesNombre = liElemento.dataset.mesNombre; 
+            const periodoCompleto = `${ano}-${mesNombre}`;
+
+            // 1. Pide confirmación
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: `Vas a mover el período "${periodoCompleto}" a la lista "Período(s) a Trabajar".`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, mover',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) {
+                return; // Si el usuario cancela, no hace nada
+            }
+
+            // 2. Actualiza el caché local (con respaldo por si hay que revertir)
+            const cacheAnterior = JSON.parse(JSON.stringify(historialMovidosCache));
+            if (!historialMovidosCache[ano]) {
+                historialMovidosCache[ano] = [];
+            }
+            if (!historialMovidosCache[ano].includes(mesNombre)) {
+                historialMovidosCache[ano].push(mesNombre);
+            }
+
+            // 3. Guarda el historial completo EN LA BASE DE DATOS
+            try {
+                const resGuardar = await fetch(`${API_URL}/api/periodos-movidos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ historial: historialMovidosCache })
+                });
+                if (!resGuardar.ok) {
+                    const errData = await resGuardar.json().catch(() => ({}));
+                    throw new Error(errData.message || 'El servidor rechazó el guardado.');
+                }
+            } catch (error) {
+                historialMovidosCache = cacheAnterior; // Revertimos: no se guardó, no lo mostramos como guardado
+                mostrarAlerta(`No se pudo guardar el período: ${error.message}`, 'error');
+                return;
+            }
+
+            // 4. Mueve el elemento visualmente (si el guardado fue exitoso)
+            if (periodoLista.querySelector('.italic')) {
+                periodoLista.innerHTML = '';
+            }
+            liElemento.remove();
+
+            const nuevoLi = document.createElement('li');
+            nuevoLi.textContent = periodoCompleto;
+            nuevoLi.dataset.periodo = periodoCompleto;
+            nuevoLi.className = "cursor-pointer p-2 hover:bg-green-100 rounded-md";
+            nuevoLi.addEventListener('click', () => seleccionarPeriodoFinal(nuevoLi));
+            nuevoLi.addEventListener('dblclick', () => devolverMes(nuevoLi)); 
+            
+            periodoLista.appendChild(nuevoLi);
+            if (mesList.children.length === 0 || mesList.querySelector('li') === null) {
+                 mesList.innerHTML = '<li class="p-2 text-gray-400 text-center italic">Todos los meses han sido movidos.</li>';
+            }
+        }
+
+        function seleccionarPeriodoFinal(liElemento) {
+            if (!iniciarBtn) return;
+            const periodo = liElemento.dataset.periodo;
+            periodoActivoSeleccionado = periodo; 
+            Array.from(periodoLista.children).forEach(child => {
+                child.classList.remove('bg-green-200', 'font-bold');
+            });
+            liElemento.classList.add('bg-green-200', 'font-bold');
+            iniciarBtn.disabled = false; 
+        }
+
+async function iniciarPeriodo() {
+    if (!periodoActivoSeleccionado) {
+        Swal.fire('Error', 'Debes seleccionar un período.', 'warning');
+        return;
+    }
+    
+    // 1. Feedback visual
+    const btn = document.getElementById('btn-iniciar-periodo');
+    const textoOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+
+    try {
+        const bodyData = { periodo: periodoActivoSeleccionado };
+        
+        // 2. CORRECCIÓN 1: Usamos la ruta del RELOJ GLOBAL
+        const response = await fetch(`${API_URL}/api/periodo-global`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify(bodyData)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Error al guardar el período');
+        }
+        
+        // 3. Guardamos localmente
+        localStorage.setItem('periodo', periodoActivoSeleccionado);
+        console.log("✅ Guardado exitoso. Entrando al sistema...");
+        
+        // =======================================================
+        // 4. CORRECCIÓN 2: ¡NO RECARGAMOS! SOLO CAMBIAMOS LA VISTA
+        // =======================================================
+        
+        // A) Ocultamos el Modal
+        document.getElementById('periodoModalOverlay').classList.add('hidden');
+        
+        // B) Mostramos el Sistema Principal
+        document.getElementById('app-container').classList.remove('hidden');
+
+        // C) Actualizamos el texto del periodo en la cabecera azul
+        const lblPeriodo = document.getElementById('periodo-actual');
+        if(lblPeriodo) lblPeriodo.textContent = `Período: ${periodoActivoSeleccionado}`;
+
+        // D) Cargamos los datos de la primera pantalla
+        if (typeof cargarPersonas === "function") await cargarPersonas();
+        if (typeof cargarOpcionesProfesion === "function") await cargarOpcionesProfesion();
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        
+        // Fallback: Si falla el servidor, dejamos entrar localmente para no trabar
+        localStorage.setItem('periodo', periodoActivoSeleccionado);
+        document.getElementById('periodoModalOverlay').classList.add('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
+        if (typeof cargarPersonas === "function") await cargarPersonas();
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Modo Local',
+            text: 'No se pudo sincronizar con el servidor global, pero puedes trabajar localmente.',
+            confirmButtonText: 'Entendido'
+        });
+
+    } finally {
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }
+    }
+}
+        
+        // Reemplazamos listener de formValidarPersona por uno que use cache si es posible
+        formValidarPersona.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dniValidacion = document.getElementById('validar_dni').value;
+            try {
+                // 1. Primero, busca si la persona ya está en la tabla cargada
+                const personaEncontrada = personasCache.find(p => p.dni === dniValidacion);
+                
+                if (!personaEncontrada) {
+                    // 2. Si no está en la tabla (raro, pero posible), la valida en la BD
+                    const res = await fetch(`${API_URL}/buscar-persona-modal`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ dni: dniValidacion }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Error en la validación.');
+                    
+                    // 3. Como es un DNI nuevo, su estado por defecto es 'activo'
+                    data.estado = data.estado || 'activo'; 
+                    abrirModalParaEditar(data); // Pasa el objeto completo
+                } else {
+                    // 4. Si la encontró en la caché, usa ese objeto (que tiene el estado histórico)
+                    abrirModalParaEditar(personaEncontrada);
+                }
+            } catch (err) {
+                mostrarAlerta(err.message, 'error');
+            }
+        });
+
+formPersona.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const personaId = document.getElementById('persona_id').value;
+            const url = personaId ? `${API_URL}/editar-persona/${personaId}` : `${API_URL}/crear-persona`;
+            const method = personaId ? 'PUT' : 'POST';
+            
+            // 1. Capturamos todos los datos del formulario (MAESTROS)
+            const dataMaestra = {
+                dni: document.getElementById('dni').value,
+                nombre: document.getElementById('nombre').value,
+                apellido_paterno: document.getElementById('apellido_paterno').value,
+                apellido_materno: document.getElementById('apellido_materno').value,
+                sexo: document.getElementById('sexo').value,
+                estado_civil: document.getElementById('estado_civil').value,
+                fecha_nacimiento: document.getElementById('fecha_nacimiento').value || null,
+                direccion: document.getElementById('direccion').value,
+                ubigeo: document.getElementById('ubigeo').value,
+                celular: document.getElementById('celular').value,
+                profesion: document.getElementById('profesion').value,
+                correo: document.getElementById('correo').value,
+                foto: document.getElementById('foto').value,
+                
+                // ========================================================
+                // === ¡AGREGA ESTA LÍNEA! ===
+                // Esto envía "2025-Enero" al backend para que sepa la fecha correcta
+                // ========================================================
+                periodo: localStorage.getItem('periodo') 
+            };
+            
+            // ... resto del código sigue igual ...
+            
+            // 2. Capturamos el estado (nuevo y antiguo)
+            const estadoNuevo = document.getElementById('estado').value;
+            const estadoAntiguo = document.getElementById('estado_actual_historico').value;
+            const periodo = localStorage.getItem('periodo');
+
+            if (!personaId) { // Es CREACIÓN
+                dataMaestra.contrasena = document.getElementById('contrasena').value;
+                // Al crear, el 'estado' sí va en la llamada maestra (será el estado por defecto)
+                dataMaestra.estado = estadoNuevo; 
+            }
+
+            try {
+                // --- LLAMADA 1: Guardar Datos Maestros ---
+                const resMaestro = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(dataMaestra)
+                });
+
+                if (!resMaestro.ok) {
+                    const errorData = await resMaestro.json();
+                    throw new Error(errorData.message || 'Error al guardar los datos de la persona.');
+                }
+                
+                // Obtenemos el ID, ya sea el existente o el nuevo creado
+                let idPersonaAfectada = personaId;
+                if (!idPersonaAfectada) {
+                    const resData = await resMaestro.json();
+                    idPersonaAfectada = resData.id;
+                }
+
+                let mensajeExito = 'Persona guardada correctamente.';
+                
+                // --- LLAMADA 2: Guardar Estado Histórico (SOLO SI EL ESTADO CAMBIÓ) ---
+                // (Se ejecuta al crear o si el estado cambió al editar)
+                if (!personaId || (personaId && estadoNuevo !== estadoAntiguo)) {
+                    
+                    // Si estamos creando, usamos el primer día del mes de Enero del año actual como "fecha efectiva"
+                    const periodoHistorico = personaId ? periodo : `${new Date().getFullYear()}-Enero`;
+
+                    const resEstado = await fetch(`${API_URL}/personas/cambiar-estado`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ 
+                            persona_id: idPersonaAfectada,
+                            nuevo_estado: estadoNuevo,
+                            periodo: periodoHistorico // Usamos el período de la sesión o uno por defecto
+                        })
+                    });
+                    
+                    if (!resEstado.ok) {
+                        throw new Error('Datos del perfil guardados, pero falló el registro del estado inicial.');
+                    }
+                    
+                    mensajeExito = 'Datos del perfil y estado actualizados correctamente.';
+                }
+
+                mostrarAlerta(mensajeExito, 'success');
+                cerrarModalPersona(); 
+                cargarPersonas(); // Recarga la tabla con los nuevos datos
+            } catch (err) {
+                mostrarAlerta(err.message, 'error');
+            }
+        });
+
+        formBuscarPersona.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tipoBusqueda = document.getElementById('tipo_busqueda').value;
+            const valorBusqueda = document.getElementById('valor_busqueda').value.trim();
+            if (!valorBusqueda) {
+                cargarPersonas(); 
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/buscar-persona?type=${tipoBusqueda}&term=${encodeURIComponent(valorBusqueda)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Error en la búsqueda.');
+                renderizarPersonas(data);
+                if (data.length === 0) {
+                    mostrarAlerta('No se encontraron personas.', 'warning');
+                }
+            } catch (err) {
+                mostrarAlerta(err.message || 'No se pudo realizar la búsqueda.', 'error');
+            }
+        });
+
+        limpiarBusquedaPersonaBtn.addEventListener('click', () => {
+            document.getElementById('valor_busqueda').value = '';
+            cargarPersonas();
+        });
+        
+        // --- Lógica de Estado Civil ---
+        const sexoSelect = document.getElementById('sexo');
+        if (sexoSelect) {
+            sexoSelect.addEventListener('change', actualizarEstadoCivil); 
+        }
+        actualizarEstadoCivil(); 
+
+        // --- Lógica del Sidebar ---
+        const path = window.location.pathname.split('/').pop();
+        const allSidebarLinks = document.querySelectorAll('.sidebar a');
+        const dropdownButton = document.querySelector('[data-collapse-toggle="dropdown-mantenimiento"]');
+        const dropdownMenu = document.getElementById('dropdown-mantenimiento');
+        allSidebarLinks.forEach(link => link.classList.remove('active-link'));
+        if (dropdownButton) {
+            dropdownButton.classList.remove('active-link');
+        }
+        const paginasMantenimiento = {
+            'mantenimiento-profesion.html': true,
+            'mantenimiento-area.html': true,
+            'mantenimiento-cargos.html': true,
+            'mantenimiento-grupo-ocupacional.html': true
+        };
+        if (path === 'index.html' || path === '') {
+            document.getElementById('link-persona').classList.add('active-link');
+        } else if (path === 'mantenimiento-empleados.html') {
+            document.getElementById('link-empleados').classList.add('active-link');
+        } else if (path === 'mantenimiento-comisiones-spp.html') { 
+            document.getElementById('link-comisiones-spp').classList.add('active-link');
+        } else if (paginasMantenimiento[path]) {
+            if (dropdownButton) dropdownButton.classList.add('active-link'); 
+            if (dropdownMenu) {
+                dropdownMenu.classList.remove('hidden'); 
+                dropdownButton.setAttribute('aria-expanded', 'true');
+                const arrow = dropdownButton.querySelector('svg:last-of-type');
+                if (arrow) arrow.style.transform = 'rotate(180deg)'; 
+            }
+            const currentLink = document.querySelector(`.sidebar a[href="${path}"]`);
+            if(currentLink) currentLink.classList.add('active-link'); 
+        }
+
+    }); // <--- CIERRE DEL DOMContentLoaded
+</script>
+
+</body>
+</html>

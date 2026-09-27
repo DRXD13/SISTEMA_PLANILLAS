@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Planilla - Sistema RRHH</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        /* El preflight de Tailwind deja los botones de SweetAlert con fondo transparente (texto blanco invisible) */
+        .swal2-container .swal2-styled.swal2-confirm { background-color: var(--swal2-confirm-button-background-color, #7066e0); }
+        .swal2-container .swal2-styled.swal2-cancel { background-color: var(--swal2-cancel-button-background-color, #6e7881); }
+        .swal2-container .swal2-styled.swal2-deny { background-color: var(--swal2-deny-button-background-color, #dc3741); }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .sidebar { width: 220px; }
+        .main-content { margin-left: 220px; }
+        
+        /* Ajustes Tabulator */
+        .tabulator { border: none !important; font-size: 11px !important; border-radius: 0.5rem; }
+        .tabulator-header { background-color: #f8fafc !important; border-bottom: 2px solid #e2e8f0 !important; color: #475569 !important; font-weight: 700 !important; text-transform: uppercase !important; }
+        .tabulator-row { border-bottom: 1px solid #f1f5f9 !important; }
+        .tabulator-row:hover { background-color: #eff6ff !important; }
+        .money-cell { font-family: monospace; font-weight: 600; text-align: right; color: #334155; }
+        
+        /* Colores Específicos Cabecera */
+        .header-blue { background-color: #eff6ff !important; color: #1e40af !important; }
+        .header-green { background-color: #f0fdf4 !important; color: #15803d !important; }
+        .header-red { background-color: #fef2f2 !important; color: #b91c1c !important; }
+
+        .sidebar a.active-link { background-color: #4b5563; color: #fff; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #modalBoleta, #modalBoleta * { visibility: visible; }
+            #modalBoleta { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+<aside class="sidebar fixed top-0 left-0 h-full bg-gray-900 text-white p-4 z-50">
+    <h1 class="text-xl font-bold mb-6 text-center tracking-wider text-blue-400">MENU PRINCIPAL</h1>
+    <nav class="space-y-2">
+        <a href="index.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-user w-6 text-center mr-2 text-gray-400"></i> Persona
+        </a>
+        
+        <button type="button" class="flex items-center w-full py-3 px-4 rounded hover:bg-gray-800 transition-colors text-left" data-collapse-toggle="dropdown-mantenimiento">
+            <i class="fas fa-tools w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium flex-1">Mantenimiento</span>
+            <i class="fas fa-chevron-down text-xs text-gray-500 ml-auto"></i>
+        </button>
+        <ul id="dropdown-mantenimiento" class="hidden py-2 space-y-1 bg-gray-800 rounded ml-4 mt-1">
+            <li><a href="mantenimiento-profesion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white"><i class="fas fa-graduation-cap w-5 mr-2 text-xs"></i> Profesión</a></li>
+            <li><a href="mantenimiento-area.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white"><i class="fas fa-building w-5 mr-2 text-xs"></i> Área</a></li>
+            <li><a href="mantenimiento-cargos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white"><i class="fas fa-briefcase w-5 mr-2 text-xs"></i> Cargos</a></li>
+            <li><a href="mantenimiento-grupo-ocupacional.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white"><i class="fas fa-layer-group w-5 mr-2 text-xs"></i> Grupo Ocup.</a></li>
+            <li><a href="mantenimiento-sistemas-pensiones.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white"><i class="fas fa-piggy-bank w-5 mr-2 text-xs"></i> Sist. Pensiones</a></li>
+            <li><a href="mantenimiento-meta.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white"><i class="fas fa-bullseye w-5 mr-2 text-xs"></i> Metas</a></li>
+            <li><a href="mantenimiento-entidad.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-university w-5 mr-2 text-center text-xs"></i> Entidades Fin.</a></li>
+            <li>
+                <a href="mantenimiento-conceptos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-list-ul w-5 mr-2 text-center text-xs"></i> Conceptos
+                </a>
+            </li>
+            <li><a href="mantenimiento-configuracion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-cogs w-5 mr-2 text-center text-xs"></i> Configuración</a></li>
+        <li>
+    <a href="mantenimiento-sindicatos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+        <i class="fas fa-users w-5 mr-2 text-center text-xs"></i> Sindicatos
+    </a>
+</li>
+        </ul>
+        
+        <a id="link-empleados" href="mantenimiento-empleados.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-id-card w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium">Trabajadores</span>
+        </a>
+        <a href="mantenimiento-comisiones-spp.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-chart-line w-6 text-center mr-2 text-gray-400"></i> Comisiones SPP
+        </a>
+        <a href="control-asistencias.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-calendar-check w-6 text-center mr-2 text-gray-400"></i> Asistencias
+        </a>
+        
+        <a id="link-judiciales" href="judiciales.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-gavel w-6 text-center mr-2 text-gray-400"></i> <span class="font-medium">Judiciales</span>
+        </a>
+        <a id="link-prestamos" href="prestamos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-hand-holding-usd w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium">Préstamos</span>
+        </a>
+        <a href="calculo-planilla.html" class="block flex items-center py-3 px-4 rounded bg-gray-800 text-white transition-colors active-link">
+            <i class="fas fa-calculator w-6 text-center mr-2 text-gray-400"></i> Planilla
+        </a>
+        <a href="calculo-planilla-reincorporados.html" class="flex items-center gap-3 p-3 rounded-lg bg-slate-700/50 text-white font-bold text-sm shadow-inner">
+    <i class="fas fa-user-clock text-green-400"></i> Planilla Reincorp.
+</a>
+        <a id="link-sindicatos-operacion" href="sindicatos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors border-l-4 border-transparent hover:border-pink-500">
+    <i class="fas fa-handshake w-6 text-center mr-2 text-gray-400"></i>
+    <span class="font-medium">Sindicate</span>
+</a>
+</nav>
+    <div class="absolute bottom-0 left-0 w-full p-4 text-center text-xs text-gray-600 border-t border-gray-800">v2.0 Sistema RRHH</div>
+</aside>
+
+
+<div class="main-content min-h-screen flex flex-col">
+    <header class="bg-blue-600 text-white p-4 flex justify-between items-center shadow sticky top-0 z-20">
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+            <i class="fas fa-calculator"></i> Procesamiento de Planilla
+            <span id="periodo-actual" class="ml-4 text-sm font-normal bg-blue-700 px-3 py-1 rounded shadow-sm"></span>
+        </h2>
+        <div class="relative inline-block text-left">
+            <img src="avatar.png" alt="Usuario" class="w-10 h-10 rounded-full border-2 border-white cursor-pointer" onclick="toggleDropdown()">
+<div id="user-dropdown"
+                    class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg overflow-hidden z-50">
+                    <div class="px-4 py-2 text-gray-700 border-b">
+                        <span id="user-name" class="font-semibold">Usuario: -</span>
+                    </div>
+                    
+                    <!-- NUEVO BOTÓN DE GESTIÓN DE USUARIOS -->
+                    <a href="gestion-usuarios.html" id="btn-gestion-usuarios" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        👥 Gestión de Usuarios
+                    </a>
+                    
+                    <button onclick="cambiarPeriodo()" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        🔄 Cambiar Período
+                    </button>
+                    <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-hidden p-6 flex flex-col gap-6">
+        
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 shrink-0">
+            <div class="xl:col-span-2 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Personal</p>
+                    <h3 class="text-2xl font-bold text-gray-800" id="kpi-count">0</h3>
+                    <i class="fas fa-users absolute right-2 bottom-2 text-blue-100 text-3xl"></i>
+                    <div class="absolute right-0 top-0 h-full w-1 bg-blue-500"></div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Total Bruto</p>
+                    <h3 class="text-lg font-bold text-green-600 font-mono" id="kpi-bruto">S/ 0</h3>
+                    <i class="fas fa-coins absolute right-2 bottom-2 text-green-100 text-3xl"></i>
+                    <div class="absolute right-0 top-0 h-full w-1 bg-green-500"></div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Descuentos</p>
+                    <h3 class="text-lg font-bold text-red-500 font-mono" id="kpi-desc">S/ 0</h3>
+                    <i class="fas fa-cut absolute right-2 bottom-2 text-red-100 text-3xl"></i>
+                    <div class="absolute right-0 top-0 h-full w-1 bg-red-500"></div>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 relative overflow-hidden group">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Neto a Pagar</p>
+                    <h3 class="text-xl font-bold text-white font-mono" id="kpi-neto">S/ 0</h3>
+                    <i class="fas fa-wallet absolute right-2 bottom-2 text-slate-600 text-3xl"></i>
+                    <div class="absolute right-0 top-0 h-full w-1 bg-blue-400"></div>
+                </div>
+            </div>
+            <div class="xl:col-span-1 bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center">
+                <div id="chart-container" class="w-full"></div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
+            <div class="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center gap-4 flex-wrap">
+                <div class="flex items-center gap-2">
+                    
+                    <select id="filtro-tipo-planilla" onchange="filtrarPlanilla()" class="py-1.5 px-3 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 uppercase bg-white">
+                        <option value="TODOS" selected>-- TODOS --</option>
+                        <option value="EMPLEADO">EMPLEADOS</option>
+                        <option value="OBRERO">OBREROS</option>
+                        <option value="CAS">CAS</option>
+                    </select>
+                    
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="filtro" placeholder="Buscar empleado..." class="pl-8 pr-4 py-1.5 text-xs border border-gray-300 rounded-lg w-56 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="window.cargarDatosReales()" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded text-xs font-bold transition flex items-center shadow-sm">
+                        <i class="fas fa-sync mr-2"></i> RECALCULAR
+                    </button>
+                    <button id="btn-exportar" class="bg-green-600 text-white hover:bg-green-700 px-3 py-2 rounded text-xs font-bold transition flex items-center shadow-sm">
+                        <i class="fas fa-file-excel mr-2"></i> EXPORTAR
+                    </button>
+                    <div id="botones-accion-dinamicos" class="flex gap-2"></div>
+                </div>
+            </div>
+            
+            <div id="tabla-nomina" class="w-full h-full bg-white flex-1"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modalBoleta" class="fixed inset-0 bg-slate-900/60 hidden z-[90] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="bg-slate-50 border-b px-6 py-4 flex justify-between items-center no-print">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-file-invoice text-blue-600"></i> Boleta de Pago</h3>
+            <button onclick="document.getElementById('modalBoleta').classList.add('hidden')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div id="contenido-boleta" class="p-8 overflow-y-auto font-mono text-xs text-slate-700 bg-white">
+            </div>
+        <div class="p-4 bg-slate-50 border-t flex justify-end gap-3 no-print">
+            <button onclick="document.getElementById('modalBoleta').classList.add('hidden')" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-white rounded font-bold text-xs">Cerrar</button>
+            <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded font-bold text-xs shadow"><i class="fas fa-print mr-2"></i> Imprimir</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="calculo-planilla.js?v=11"></script> 
+<script src="seguridad-roles.js"></script>
+</body>
+</html>
+<script>
+    // Lógica mínima de sesión y menú
+    const token = localStorage.getItem('token');
+    const periodo = localStorage.getItem('periodo');
+    const username = localStorage.getItem('username');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // if(!token) window.location.href = 'login.html'; // Descomentar en prod
+        const rolUsuario = localStorage.getItem('rol') || 'Administrador';
+document.getElementById('user-name').textContent = `Rol: ${rolUsuario}`;
+        if(periodo) document.getElementById('periodo-actual').textContent = `Período: ${periodo}`;
+    });
+
+    const logout = () => { localStorage.clear(); window.location.href = 'login.html'; };
+    const toggleDropdown = () => { document.getElementById('user-dropdown').classList.toggle('hidden'); };
+    // "Cambiar Período" del menú de usuario: igual que en el resto de pantallas
+    const cambiarPeriodo = async () => {
+        const btn = document.querySelector('button[onclick="cambiarPeriodo()"]');
+        if (btn) btn.innerHTML = 'Cerrando...';
+        localStorage.removeItem('periodo'); window.location.replace('index.html');
+    };
+    window.addEventListener('click', (e) => { if (document.getElementById('user-dropdown') && !e.target.closest('.relative')) document.getElementById('user-dropdown').classList.add('hidden'); });
+</script>
+<div id="modal-inicio" class="fixed top-0 right-0 bottom-0 left-[220px] bg-slate-900/95 z-[40] flex items-center justify-center p-4 backdrop-blur-sm">
+    
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border-t-4 border-blue-600 animate-fade-in-up">
+        <div class="bg-gray-50 p-6 text-center border-b border-gray-100">
+            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-cog text-3xl text-blue-600"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-gray-800 tracking-tight">CONFIGURAR SESIÓN</h2>
+            <p class="text-gray-500 text-xs mt-1">Selecciona los parámetros para trabajar</p>
+        </div>
+
+        <div class="p-8 space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Tipo de Planilla</label>
+                <div class="relative">
+                    <select id="inicio-tipo" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 pl-10 bg-white font-bold text-gray-700 appearance-none">
+                        <option value="TODOS">-- SELECCIONAR --</option>
+                        <option value="EMPLEADO">EMPLEADO</option>
+                        <option value="OBRERO">OBRERO</option>
+                        <option value="CAS">CAS</option>
+                    </select>
+                    <i class="fas fa-users absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Subtipo / Cargo</label>
+                <div class="relative">
+                    <select id="inicio-subtipo" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 pl-10 bg-white text-gray-600 appearance-none">
+                        <option value="">(Opcional) TODOS</option>
+                        <option value="ALCALDE">ALCALDE</option>
+                        <option value="FUNCIONARIO">FUNCIONARIO</option>
+                        <option value="NOMBRADO">NOMBRADO</option>
+                        <option value="PERMANENTE">PERMANENTE</option>
+                        <option value="CONTRATADO">CONTRATADO</option>
+                    </select>
+                    <i class="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <button onclick="ingresarAlSistema()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 flex justify-center items-center gap-2 mt-4 hover:-translate-y-1">
+                <span>INGRESAR AL SISTEMA</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

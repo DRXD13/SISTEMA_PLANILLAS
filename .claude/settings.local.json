@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node \"C:\\\\Users\\\\retis\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--sistema-planilla\\\\b6a4be23-68e7-412f-aebe-b78ceb27aa1c\\\\scratchpad\\\\inspect.js\")",
+      "PowerShell(Get-Process *)"
+    ]
+  }
+}

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mantenimiento de Conceptos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* El preflight de Tailwind deja los botones de SweetAlert con fondo transparente (texto blanco invisible) */
+        .swal2-container .swal2-styled.swal2-confirm { background-color: var(--swal2-confirm-button-background-color, #7066e0); }
+        .swal2-container .swal2-styled.swal2-cancel { background-color: var(--swal2-cancel-button-background-color, #6e7881); }
+        .swal2-container .swal2-styled.swal2-deny { background-color: var(--swal2-deny-button-background-color, #dc3741); }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .sidebar { width: 220px; }
+        .main-content { margin-left: 220px; }
+        .rotate-180 { transform: rotate(180deg); }
+        .transition-transform { transition: transform 0.2s; }
+        /* Scroll personalizado */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar fixed top-0 left-0 h-full bg-gray-900 text-white p-4 z-10">
+    <h1 class="text-xl font-bold mb-6 text-center tracking-wider text-blue-400">MENU PRINCIPAL</h1>
+    <nav class="space-y-2">
+        <a id="link-persona" href="index.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-user w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Persona</span>
+        </a>
+        
+        <button type="button" class="flex items-center w-full py-3 px-4 rounded bg-gray-800 text-white transition-colors text-left" data-collapse-toggle="dropdown-mantenimiento">
+            <i class="fas fa-tools w-6 text-center mr-2 text-gray-400"></i>
+            <span class="font-medium flex-1">Mantenimiento</span>
+            <i class="fas fa-chevron-down text-xs text-gray-500 ml-auto transition-transform"></i>
+        </button>
+        
+        <ul id="dropdown-mantenimiento" class="hidden py-2 space-y-1 bg-gray-800 rounded ml-4 mt-1">
+            <li><a href="mantenimiento-profesion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-graduation-cap w-5 mr-2 text-center text-xs"></i> Profesión</a></li>
+            <li><a href="mantenimiento-area.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-building w-5 mr-2 text-center text-xs"></i> Área</a></li>
+            <li><a href="mantenimiento-cargos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-briefcase w-5 mr-2 text-center text-xs"></i> Cargos</a></li>
+            <li><a href="mantenimiento-grupo-ocupacional.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-layer-group w-5 mr-2 text-center text-xs"></i> Grupo Ocup.</a></li>
+            <li><a href="mantenimiento-sistemas-pensiones.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-piggy-bank w-5 mr-2 text-center text-xs"></i> Sist. Pensiones</a></li>
+            <li><a href="mantenimiento-meta.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-bullseye w-5 mr-2 text-center text-xs"></i> Metas</a></li>
+            <li><a href="mantenimiento-conceptos.html" class="flex items-center w-full py-2 px-3 rounded bg-gray-700 text-white text-sm transition-colors"><i class="fas fa-list-ul w-5 mr-2 text-center text-xs"></i> Conceptos</a></li>
+            <li><a href="mantenimiento-entidad.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-university w-5 mr-2 text-center text-xs"></i> Entidades Fin.</a></li>
+            <li><a href="mantenimiento-configuracion.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors"><i class="fas fa-cogs w-5 mr-2 text-center text-xs"></i> Configuración</a></li>
+        <li>
+    <a href="mantenimiento-sindicatos.html" class="flex items-center w-full py-2 px-3 rounded hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors">
+        <i class="fas fa-users w-5 mr-2 text-center text-xs"></i> Sindicatos
+    </a>
+</li>
+        </ul>
+        
+        <a id="link-empleados" href="mantenimiento-empleados.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-id-card w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Trabajadores</span>
+        </a>
+        <a id="link-comisiones-spp" href="mantenimiento-comisiones-spp.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors"><i class="fas fa-chart-line w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Comisiones SPP</span></a>
+        <a id="link-asistencias" href="control-asistencias.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors"><i class="fas fa-calendar-check w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Asistencias</span></a>
+        <a id="link-judiciales" href="judiciales.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-gavel w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Judiciales</span>
+        </a>
+        <a id="link-prestamos" href="prestamos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors">
+            <i class="fas fa-hand-holding-usd w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Préstamos</span>
+        </a>
+        <a id="link-planilla" href="calculo-planilla.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors"><i class="fas fa-calculator w-6 text-center mr-2 text-gray-400"></i><span class="font-medium">Planilla</span></a>
+        <a id="link-sindicatos-operacion" href="sindicatos.html" class="block flex items-center py-3 px-4 rounded hover:bg-gray-800 transition-colors border-l-4 border-transparent hover:border-pink-500">
+    <i class="fas fa-handshake w-6 text-center mr-2 text-gray-400"></i>
+    <span class="font-medium">Sindicate</span>
+</a>
+    </nav>
+    <div class="absolute bottom-0 left-0 w-full p-4 text-center text-xs text-gray-600 border-t border-gray-800">v2.0 Sistema RRHH</div>
+</aside>
+
+<div class="main-content min-h-screen flex flex-col">
+    <header class="bg-blue-600 text-white px-6 py-3 flex justify-between items-center shadow sticky top-0 z-20">
+        <div class="flex items-center gap-4">
+            <h2 class="text-lg font-bold">Mantenimiento de Conceptos</h2>
+            <span id="periodo-actual" class="bg-blue-800 text-blue-100 text-xs font-semibold px-3 py-1 rounded shadow-sm border border-blue-700">Cargando...</span>
+        </div>
+        
+        <div class="relative inline-block text-left">
+            <img src="avatar.png" alt="Usuario" class="w-9 h-9 rounded-full border-2 border-white cursor-pointer hover:opacity-90 transition-opacity" onclick="toggleDropdown()">
+           <div id="user-dropdown"
+                    class="hidden absolute right-0 mt-2 w-48 bg-white rounded shadow-lg overflow-hidden z-50">
+                    <div class="px-4 py-2 text-gray-700 border-b">
+                        <span id="user-name" class="font-semibold">Usuario: -</span>
+                    </div>
+                    
+                    <!-- NUEVO BOTÓN DE GESTIÓN DE USUARIOS -->
+                    <a href="gestion-usuarios.html" id="btn-gestion-usuarios" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        👥 Gestión de Usuarios
+                    </a>
+                    
+                    <button onclick="cambiarPeriodo()" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                        🔄 Cambiar Período
+                    </button>
+                    <button onclick="logout()" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition-colors">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
+        </div>
+    </header>
+
+    <div class="p-6">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">LISTADO MAESTRO</h3>
+                    <p class="text-xs text-gray-500">Definición de ingresos, descuentos y aportes</p>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto items-center">
+                    
+                    <button onclick="abrirModalFiltro()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-2 px-3 rounded-lg border border-gray-300 shadow-sm transition-colors h-10" title="Filtrar por Régimen">
+                        <i class="fas fa-filter"></i>
+                    </button>
+
+                    <div class="relative w-full md:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
+                        <input type="text" id="buscador" class="pl-10 block w-full rounded-lg border-gray-300 bg-gray-50 text-sm focus:ring-blue-500 focus:border-blue-500 uppercase h-10" placeholder="BUSCAR CONCEPTO...">
+                    </div>
+                    <button onclick="abrirModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow transition-all h-10">
+                        <i class="fas fa-plus"></i> <span class="hidden sm:inline">NUEVO</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="etiqueta-filtro-activo" class="hidden mb-4 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg flex justify-between items-center max-w-xs">
+                <span class="text-sm font-bold flex items-center gap-2">
+                    <i class="fas fa-filter"></i> <span id="texto-filtro-activo">FILTRO</span>
+                </span>
+                <button onclick="aplicarFiltro('')" class="text-blue-500 hover:text-blue-700 font-bold text-lg leading-none">&times;</button>
+            </div>
+
+            <div class="overflow-hidden border rounded-lg shadow-sm">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-20">CÓDIGO</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">CONCEPTO / DESCRIPCIÓN</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-24">APLICA</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-24">TIPO</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-24">OPERACIÓN</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">EN PLANILLA (ROL / COLUMNA)</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-20" title="Trabajadores con monto asignado">ASIGNADOS</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-24">ESTADO</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-24">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-xs text-gray-500 text-right" id="contador-registros">Cargando...</div>
+        </div>
+    </div>
+</div>
+
+<div id="modalConcepto" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity backdrop-blur-sm" onclick="cerrarModal()"></div>
+        <div class="inline-block align-bottom bg-slate-900 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-slate-700">
+            <div class="px-6 py-4 border-b border-slate-700 bg-slate-900">
+                <h3 class="text-lg font-bold text-white uppercase text-center tracking-wider" id="modal-title">REGISTRO DE CONCEPTOS</h3>
+            </div>
+            <form id="form-concepto" onsubmit="event.preventDefault(); guardarConcepto();" class="p-8 space-y-6 bg-slate-900">
+                <input type="hidden" id="id-concepto">
+
+                <input type="hidden" id="in-codigo" value="">
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">TIPO DE CONCEPTOS</label>
+                    <select id="in-aplicacion" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+                        <option value="Empleado">EMPLEADO</option>
+                        <option value="Obrero">OBRERO</option>
+                        <option value="CAS">CAS</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">CONCEPTO</label>
+                    <input type="text" id="in-nombre" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5 uppercase font-bold" placeholder="NOMBRE DEL CONCEPTO" required>
+                    <input type="hidden" id="in-descripcion" value="">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">TIPO</label>
+                    <select id="in-tipo" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" onchange="verificarTipoConcepto()">
+                        <option value="Variable">CONCEPTO VARIABLE</option>
+                        <option value="Fijo">CONCEPTO FIJO</option>
+                        <option value="Porcentual">CONCEPTO PORCENTUAL</option>
+                    </select>
+                </div>
+
+                <div id="div-monto-defecto" class="space-y-1 hidden">
+                    <label class="block text-xs font-bold text-green-400 uppercase tracking-wide">Monto Fijo (S/)</label>
+                    <input type="number" step="0.01" id="in-monto-defecto" class="block w-full rounded bg-slate-800 border-green-600 text-green-400 font-bold text-right focus:ring-green-500 focus:border-green-500 text-sm p-2.5" placeholder="0.00">
+                    <p class="text-[10px] text-slate-500">* Se cargará automáticamente al agregar.</p>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">OPERACIONES</label>
+                    <select id="in-operacion" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" onchange="llenarRoles()">
+                        <option value="Ingreso">INGRESO</option>
+                        <option value="Descuento">DESCUENTO</option>
+                        <option value="Aporte">APORTE</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">ROL EN LA PLANILLA</label>
+                    <select id="in-rol" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" onchange="actualizarAyudaRol()"></select>
+                    <p id="ayuda-rol" class="text-[10px] text-slate-500"></p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="space-y-1 col-span-2">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">COLUMNA EN LA PLANILLA</label>
+                        <input type="text" id="in-columna" list="lista-columnas" maxlength="60" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5 uppercase" placeholder="(igual al nombre)">
+                        <datalist id="lista-columnas"></datalist>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">ORDEN</label>
+                        <input type="number" step="1" id="in-orden" class="block w-full rounded bg-slate-800 border-slate-600 text-white text-right focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" placeholder="auto">
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-500 -mt-4">* La columna agrupa el mismo concepto de distintos regímenes (ej. el mismo DS para Empleado, Obrero y CAS). El orden también define el orden de suma.</p>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">VIGENTE DESDE (PERIODO)</label>
+                    <input type="month" id="in-vigente-desde" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+                    <p class="text-[10px] text-slate-500">* El concepto solo aparece en las planillas de este periodo en adelante. Vacío = todos los periodos (catálogo original).</p>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide">ESTADO</label>
+                    <select id="in-estado" class="block w-full rounded bg-slate-800 border-slate-600 text-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+                        <option value="activo">ACTIVO (se procesa en la planilla)</option>
+                        <option value="inactivo">INACTIVO (no se procesa)</option>
+                    </select>
+                </div>
+
+                <div class="pt-6 flex justify-end gap-3">
+                    <button type="button" onclick="cerrarModal()" class="px-4 py-2 text-sm font-bold text-gray-300 border border-gray-600 rounded hover:bg-slate-800 transition">CANCELAR</button>
+                    <button type="submit" class="px-6 py-2 text-sm font-bold text-white bg-blue-600 rounded hover:bg-blue-500 shadow-lg transition">GUARDAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="filtroModal" class="hidden fixed inset-0 z-[80] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="cerrarModalFiltro()"></div>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <h3 class="text-lg leading-6 font-bold text-gray-900 text-center mb-4">FILTRAR CONCEPTOS POR TIPO</h3>
+                <div class="grid grid-cols-1 gap-3">
+                    <button onclick="aplicarFiltro('Empleado')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded border border-blue-200 flex items-center justify-center"><i class="fas fa-user-tie mr-3 text-xl"></i> SOLO EMPLEADOS</button>
+                    <button onclick="aplicarFiltro('Obrero')" class="w-full bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold py-3 px-4 rounded border border-orange-200 flex items-center justify-center"><i class="fas fa-hard-hat mr-3 text-xl"></i> SOLO OBREROS</button>
+                    <button onclick="aplicarFiltro('CAS')" class="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold py-3 px-4 rounded border border-purple-200 flex items-center justify-center"><i class="fas fa-clipboard-list mr-3 text-xl"></i> SOLO CAS</button>
+                    <hr class="my-2">
+                    <button onclick="aplicarFiltro('')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded border border-gray-300 flex items-center justify-center"><i class="fas fa-users mr-3 text-xl"></i> VER TODOS</button>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse justify-center">
+                <button type="button" onclick="cerrarModalFiltro()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="seguridad-roles.js"></script>
+</body>
+</html>
+<script src="mantenimiento-conceptos.js?v=3"></script>
+
+<script>
+    window.toggleDropdown = function() { const d = document.getElementById('user-dropdown'); if(d) d.classList.toggle('hidden'); };
+    window.logout = function() { localStorage.clear(); window.location.href = 'login.html'; };
+    window.cambiarPeriodo = async function() {
+        const btn = document.querySelector('button[onclick="cambiarPeriodo()"]'); if(btn) btn.innerHTML = 'Cerrando...';
+        try { 
+            const t = localStorage.getItem('token');
+            await fetch('http://localhost:3000/api/periodo-actual', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` }, body: JSON.stringify({ periodo: 'CERRAR' }) }); 
+        } catch(e){}
+        localStorage.removeItem('periodo'); window.location.replace('index.html'); 
+    };
+
+    window.addEventListener('click', (e) => { 
+        const d = document.getElementById('user-dropdown');
+        const btnAvatar = document.querySelector('img[alt="Usuario"]');
+        if (d && !d.classList.contains('hidden') && !d.contains(e.target) && e.target !== btnAvatar) { d.classList.add('hidden'); }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const usr = localStorage.getItem('username');
+        const per = localStorage.getItem('periodo');
+        const userEl = document.getElementById('user-name');
+        if(userEl) userEl.textContent = usr || 'Admin';
+        const perEl = document.getElementById('periodo-actual');
+        if(perEl) perEl.textContent = (per && per !== 'null') ? `Período: ${per}` : 'Sin Período';
+
+        const path = window.location.pathname;
+        const page = path.split("/").pop();
+        const paginasMantenimiento = ['mantenimiento-profesion.html', 'mantenimiento-area.html', 'mantenimiento-cargos.html', 'mantenimiento-grupo-ocupacional.html', 'mantenimiento-sistemas-pensiones.html', 'mantenimiento-meta.html', 'mantenimiento-conceptos.html', 'mantenimiento-entidad.html'];
+        const dropdown = document.getElementById('dropdown-mantenimiento');
+        const botonPadre = document.querySelector('button[data-collapse-toggle="dropdown-mantenimiento"]');
+        const iconoFlecha = botonPadre?.querySelector('.fa-chevron-down');
+
+        if (paginasMantenimiento.includes(page)) {
+            if (dropdown) dropdown.classList.remove('hidden');
+            if (botonPadre) botonPadre.classList.add('bg-gray-800', 'text-white');
+            if (iconoFlecha) iconoFlecha.classList.add('rotate-180');
+        }
+        if (botonPadre && dropdown) {
+            botonPadre.removeAttribute('data-collapse-toggle'); 
+            botonPadre.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+                if (iconoFlecha) iconoFlecha.classList.toggle('rotate-180');
+            });
+        }
+    });
+</script>
+</body>
+</html>
