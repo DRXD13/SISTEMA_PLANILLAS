@@ -153,6 +153,13 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
+
+// ⚠️ BYPASS TEMPORAL DEL 2FA POR CORREO
+// Render (plan gratuito) bloquea los puertos SMTP salientes, asi que nodemailer
+// nunca logra enviar el codigo OTP y el login se cuelga / devuelve 500.
+// Mientras este en true: contraseña correcta => acceso directo, sin enviar correo.
+// Para restaurar la verificacion (p. ej. al migrar el envio a Resend), poner en false.
+const SKIP_EMAIL_VERIFICATION = true;
 // ----------------------------------------------------------------
 
 // ==================== ELIMINAR LA RUTA app.post('/login', ...) ANTERIOR ====================
@@ -181,8 +188,8 @@ app.post('/api/auth/login-step1', async (req, res) => {
             catch (e) { dispositivosGuardados = [user.dispositivo_token]; }
         }
 
-        // Si es un dispositivo de confianza, enviamos el rol
-        if (dispositivo_token && dispositivosGuardados.includes(dispositivo_token)) {
+        // Si es un dispositivo de confianza (o el 2FA esta desactivado temporalmente), enviamos el rol
+        if (SKIP_EMAIL_VERIFICATION || (dispositivo_token && dispositivosGuardados.includes(dispositivo_token))) {
             const tokenPayload = { user: { id: user.id, username: user.username, correo: user.correo, rol: user.rol } };
             const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '8h' });
             // AGREGAMOS EL ROL A LA RESPUESTA
@@ -213,6 +220,7 @@ app.post('/api/auth/login-step1', async (req, res) => {
         const [alias, dominio] = user.correo.split('@');
         res.json({ message: 'Código enviado', correoOculto: `${alias.substring(0, 3)}****@${dominio}` });
     } catch (err) {
+        console.error('Error en login-step1:', err);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
@@ -251,6 +259,7 @@ app.post('/api/auth/login-step2', async (req, res) => {
             res.json({ token, username: user.username, dispositivo_token: nuevoDispositivoToken, rol: user.rol });
         });
     } catch (err) {
+        console.error('Error en login-step2:', err);
         res.status(500).json({ message: 'Error interno' });
     }
 });
