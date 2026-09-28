@@ -154,12 +154,13 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// ⚠️ BYPASS TEMPORAL DEL 2FA POR CORREO
+// MODO DEMO (sin 2FA por correo)
 // Render (plan gratuito) bloquea los puertos SMTP salientes, asi que nodemailer
-// nunca logra enviar el codigo OTP y el login se cuelga / devuelve 500.
-// Mientras este en true: contraseña correcta => acceso directo, sin enviar correo.
-// Para restaurar la verificacion (p. ej. al migrar el envio a Resend), poner en false.
-const SKIP_EMAIL_VERIFICATION = true;
+// no puede enviar el codigo OTP. Con DEMO_MODE=true (configurado solo en Render):
+// contraseña correcta => acceso directo, sin enviar correo.
+// Sin esa variable (desarrollo local) se usa el flujo normal de 2FA por correo.
+const SKIP_EMAIL_VERIFICATION = process.env.DEMO_MODE === 'true';
+if (SKIP_EMAIL_VERIFICATION) console.log('DEMO_MODE activo: 2FA por correo desactivado.');
 // ----------------------------------------------------------------
 
 // ==================== ELIMINAR LA RUTA app.post('/login', ...) ANTERIOR ====================
